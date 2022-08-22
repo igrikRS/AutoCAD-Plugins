@@ -183,7 +183,15 @@ namespace LayoutsFromModel
         {
             BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
 
-            double scale = bref.ScaleFactors.Y;
+            // получаем коэффициент масштаба блоков из диалога настроек
+            int blockRatioScale = Configuration.AppConfig.Instance.BlockRatioScale;
+            if (blockRatioScale < 1 || blockRatioScale > 1000)
+            {
+                blockRatioScale = 1;
+                Configuration.AppConfig.Instance.BlockRatioScale = blockRatioScale;
+            }
+
+            double scale = bref.ScaleFactors.Y * blockRatioScale;
             double listWidtht = (bref.GeometricExtents.MaxPoint.X - bref.GeometricExtents.MinPoint.X) / scale;
             double listhight = (bref.GeometricExtents.MaxPoint.Y - bref.GeometricExtents.MinPoint.Y) / scale;
 

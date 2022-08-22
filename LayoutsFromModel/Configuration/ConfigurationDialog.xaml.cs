@@ -31,6 +31,7 @@ namespace LayoutsFromModel.Configuration
 		
 		public string BlockName { get; set; }
         public string TagName { get; set; }
+        public int? BlockRatioScale { get; set; }
         public bool LockViewPorts { get; set; }
 		
 		public ConfigurationDialog()
@@ -40,8 +41,8 @@ namespace LayoutsFromModel.Configuration
 		
 		public ConfigurationDialog
 			(string prefix, string suffix, Nullable<int> precision,
-			 bool delNonInitializedLayouts, double referenceDimension,
-			 bool tilemodeOn, string blockname, string tagname, bool lockViewPorts)
+			 bool delNonInitializedLayouts, double referenceDimension, bool tilemodeOn, 
+             string blockname, string tagname, int blockRatioScale, bool lockViewPorts)
 			:this()
 		{
 			this.Prefix = prefix;
@@ -52,7 +53,8 @@ namespace LayoutsFromModel.Configuration
 			this.TilemodeOn = tilemodeOn;
 			this.BlockName = blockname;
             this.TagName = tagname;
-			this.LockViewPorts = lockViewPorts;
+            this.BlockRatioScale = blockRatioScale;
+            this.LockViewPorts = lockViewPorts;
 		}
 		
 		void Window_Loaded(object sender, RoutedEventArgs e)
@@ -64,6 +66,7 @@ namespace LayoutsFromModel.Configuration
 			chkTileModeOn.IsChecked = this.TilemodeOn;
 			txtBlockName.Text = this.BlockName;
             txtTagName.Text = this.TagName;
+            txtBlockRatioScale.Text = this.BlockRatioScale.ToString();
             chkLockVP.IsChecked = this.LockViewPorts;
 		}
 		
@@ -83,6 +86,10 @@ namespace LayoutsFromModel.Configuration
 			this.BlockName = txtBlockName.Text;
             this.TagName = txtTagName.Text;
             this.LockViewPorts = chkLockVP.IsChecked ?? false;
-		}
+
+            int outBlockRatioScale;
+            this.BlockRatioScale = int.TryParse(txtBlockRatioScale.Text, out outBlockRatioScale)
+                                    ? (int?)Math.Abs(outBlockRatioScale) : 1;
+        }
 	}
 }

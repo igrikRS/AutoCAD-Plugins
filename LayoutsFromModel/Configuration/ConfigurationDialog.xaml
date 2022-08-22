@@ -68,6 +68,10 @@
             <TextBox
                 Name="txtTagName"
 				ToolTip="Имя тега в блоке-рамке для сортировки"/>
+            <Label Content="Коэффициент масштаба для блоков:" />
+            <TextBox
+                Name="txtBlockRatioScale"
+				ToolTip="Коэффициент масштаба для блоков (M 1:X), где X равно данное число."/>
         </StackPanel>
 		<StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center">
 			<Button Name="btnOK" Content="OK" Click="BtnOK_Click"/>

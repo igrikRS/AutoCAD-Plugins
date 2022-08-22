@@ -168,8 +168,16 @@ namespace LayoutsFromModel
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
+                // получаем коэффициент масштаба блоков из диалога настроек
+                int blockRatioScale = Configuration.AppConfig.Instance.BlockRatioScale;
+                if (blockRatioScale < 1 || blockRatioScale > 1000)
+                {
+                    blockRatioScale = 1;
+                    Configuration.AppConfig.Instance.BlockRatioScale = blockRatioScale;
+                }
+
                 BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
-                double scale = bref.ScaleFactors.X;
+                double scale = bref.ScaleFactors.X * blockRatioScale;
                 border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
                                                              bref.GeometricExtents.MaxPoint,
                                                              name,

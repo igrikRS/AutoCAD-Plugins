@@ -9,5 +9,6 @@
   <TemplatePath>D:\igrik\Other\AutoCAD NET\LayoutsFromModel\LayoutsFromModel\bin\Release\Шаблоны.dwt</TemplatePath>
   <BlockName>_РАМКА</BlockName>
   <TagName>ЛИСТ</TagName>
+  <BlockRatioScale>1</BlockRatioScale>
   <LockViewPorts>false</LockViewPorts>
 </AppConfig>

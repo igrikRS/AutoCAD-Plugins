@@ -84,7 +84,7 @@ namespace LayoutsFromModel
 		{
 			DrawingBorders borders = new DrawingBorders(first, second, name, scale);
 			PlotSettingsManager psm = PlotSettingsManager.Current;
-			borders.PSInfo = psm.GetPlotSettings(borders, Configuration.AppConfig.Instance.Precision);
+			borders.PSInfo = psm.GetPlotSettings(borders, /* Configuration.AppConfig.Instance.Precision*/ 10);
 			return borders;
 		}
 		

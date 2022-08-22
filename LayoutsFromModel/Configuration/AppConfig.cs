@@ -102,6 +102,18 @@ namespace LayoutsFromModel.Configuration
             set { tagName = value; }
         }
 
+        int blockRatioScale = 1;
+        /// <summary>
+        /// Коэффициент масштаба для блоков
+        /// которые вычерчены не 1:1
+        /// в результате масштаб блока будет умножен на этот коэффициент
+        /// </summary>
+        public int BlockRatioScale
+        {
+            get { return blockRatioScale; }
+            set { blockRatioScale = value; }
+        }
+
         bool lockViewPorts = false;
 		/// <summary>
 		/// Блокирование видовых экранов
@@ -180,17 +192,19 @@ namespace LayoutsFromModel.Configuration
 			                                                  TilemodeOn,
 			                                                  BlockName,
                                                               TagName,
-			                                                  LockViewPorts);
+                                                              BlockRatioScale,
+                                                              LockViewPorts);
 			win.ShowDialog();
 			if (true == win.DialogResult)
 			{
 				this.Prefix = win.Prefix;
 				this.Suffix = win.Suffix;
-				this.Precision = win.Precision??new AppConfig().Precision;
+				this.Precision = win.Precision ?? new AppConfig().Precision;
 				this.DeleteNonInitializedLayouts = win.DelNonInitializedLayouts;
 				this.TilemodeOn = win.TilemodeOn;
 				this.BlockName = win.BlockName;
-                this.tagName = win.TagName;
+                this.TagName = win.TagName;
+                this.BlockRatioScale = win.BlockRatioScale ?? new AppConfig().blockRatioScale;
                 this.LockViewPorts = win.LockViewPorts;
 				Save();
 			}
