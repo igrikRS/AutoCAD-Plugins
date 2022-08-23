@@ -121,11 +121,21 @@ namespace LayoutsFromModel.Configuration
 		public bool LockViewPorts {
 			get { return lockViewPorts; }
 			set { lockViewPorts = value; }
-		}
+		}		
 		
-		const string FILENAME = "lfmsettings.xml"; // Имя файла конфигурации
-		// Полный путь к файлу конфигурации
-		private static string SettingsFile
+        const string TEMPLATENAME = "lfmtemplate.dwt"; // Имя файла шаблона
+        /// <summary>
+        /// Получение имени файла шаблона
+        /// </summary>
+        public string GetTemplateName
+        {
+            get { return TEMPLATENAME; }
+        }
+
+        const string FILENAME = "lfmsettings.xml"; // Имя файла конфигурации
+
+        // Полный путь к файлу конфигурации
+        private static string SettingsFile
 		{
 			get
 			{
@@ -214,8 +224,21 @@ namespace LayoutsFromModel.Configuration
 		{
 			return !string.IsNullOrEmpty(this.TemplatePath)&&File.Exists(this.TemplatePath);
 		}
-		
-		public override string ToString()
+
+        public bool IsDefaulTemplateExists()
+        {
+            if ( !TemplateExists() )
+            {                
+                // если шаблона нет, заносим название по умолчанию
+                // шаблон по идее должен лежать в папке с плагином
+                string defaulTemplate = System.IO.Path.GetFullPath(this.GetTemplateName);
+                return File.Exists(defaulTemplate);
+            }
+
+            return true;
+        }
+
+        public override string ToString()
 		{
 			return string.Format(
 				"[Configuration Prefix={0}, Suffix={1}, Precision={2}, DeleteNonInitializedLayouts={3}, ReferenceDimension={4}, TilemodeOn={5}]",

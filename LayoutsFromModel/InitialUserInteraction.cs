@@ -44,13 +44,23 @@ namespace LayoutsFromModel
 			{
 				// Получаем начальный номер для Layout
 				PromptIntegerOptions pio = new PromptIntegerOptions("\n"+CP.FirstLayoutNumber);
+                // Всегда есть запрос на диалог конфигурации
 				pio.Keywords.Add(CO.Configuration);
-				if (!this.useTemplate)
-				{
-					pio.Keywords.Add(CO.UseTemplate);
-					pio.Keywords.Add(CO.TemplateSelect);
-				}
-				pio.AllowNegative = false;
+                // Всегда есть возможность на изменение шаблона
+                pio.Keywords.Add(CO.TemplateSelect);
+
+                // igrik: отключаем! принудительный выбор стандартного шаблона
+                // но это значит, что базовый шаблон должен всегда быть в папке с dll
+                //if (!this.useTemplate)
+                //{
+                //    pio.Keywords.Add(CO.UseTemplate);
+                //    pio.Keywords.Add(CO.TemplateSelect);
+                //}
+
+                // проверка наличия шаблона по умолчанию
+                CheckDefaulTemplate();
+
+                pio.AllowNegative = false;
 				pio.AllowNone = false;
 				pio.DefaultValue = this.Index;
 				piRes = ed.GetInteger(pio);
@@ -107,24 +117,41 @@ namespace LayoutsFromModel
 		{
 			if (keyword.Equals(CO.UseTemplate, StringComparison.InvariantCulture))
 			{
-				// Если файл шаблона задан и существует, присваиваем true, иначе выкидываем ошибку
-				if (Configuration.AppConfig.Instance.TemplateExists())
-					this.useTemplate = true;
-				else
-					throw new System.Exception("Не задан, или неверно задан файл шаблона");
-			}
-			
-			if (keyword.Equals(CO.TemplateSelect, StringComparison.InvariantCulture))
+                // Если файл шаблона задан и существует, присваиваем true, иначе выкидываем ошибку
+                if (Configuration.AppConfig.Instance.TemplateExists())
+                    this.useTemplate = true;
+                else
+                    throw new System.Exception("Не задан, или неверно задан файл шаблона");
+            }
+
+            if (keyword.Equals(CO.TemplateSelect, StringComparison.InvariantCulture))
 			{
 				this.useTemplate = SelectTemplate();
 			}
 		}
-		
-		/// <summary>
-		/// Запрос пользователя для выбора файла шаблона
-		/// </summary>
-		/// <returns>True, если был выбран корректный файл шаблона, иначе false</returns>
-		private bool SelectTemplate()
+
+        /// <summary>
+        /// by igrik
+        /// Проверка наличия шаблона по умолчанию
+        /// файл "Шаблон.dwt" должен лежать в папке с плагином
+        /// </summary>
+        private void CheckDefaulTemplate()
+        {
+            if (!this.useTemplate)
+            {
+                if (Configuration.AppConfig.Instance.IsDefaulTemplateExists())
+                    this.useTemplate = true;
+                else
+                    this.useTemplate = SelectTemplate();
+                    // throw new System.Exception("Отсутствует базовый файл шаблона в папке с плагином!");
+            }
+        }
+
+        /// <summary>
+        /// Запрос пользователя для выбора файла шаблона
+        /// </summary>
+        /// <returns>True, если был выбран корректный файл шаблона, иначе false</returns>
+        private bool SelectTemplate()
 		{
 			Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
 			PromptOpenFileOptions pofo = new PromptOpenFileOptions(CP.TemplateFileQuery);

@@ -6,7 +6,7 @@
   <DeleteNonInitializedLayouts>false</DeleteNonInitializedLayouts>
   <ReferenceDimension>185</ReferenceDimension>
   <TilemodeOn>true</TilemodeOn>
-  <TemplatePath>D:\igrik\Other\AutoCAD NET\LayoutsFromModel\LayoutsFromModel\bin\Release\Шаблоны.dwt</TemplatePath>
+  <TemplatePath>D:\igrik\Other\AutoCAD NET\LayoutsFromModel\LayoutsFromModel\bin\Release\lfmtemplate.dwt</TemplatePath>
   <BlockName>_РАМКА</BlockName>
   <TagName>ЛИСТ</TagName>
   <BlockRatioScale>1</BlockRatioScale>

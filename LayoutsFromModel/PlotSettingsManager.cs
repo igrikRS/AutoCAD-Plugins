@@ -43,7 +43,7 @@ namespace LayoutsFromModel
 		/// <param name="borders">Границы области, для которой надо делать Layout</param>
 		/// <param name="precision">Точность определения формата</param>
 		/// <returns>Формат бумаги</returns>
-		public PlotSettingsInfo GetPlotSettings(DrawingBorders borders, int precision)
+		public PlotSettingsInfo GetPlotSettings(DrawingBorders borders, int precision = 10)
 		{
 			double scale = 1 / borders.ScaleFactor;
 			return plotSettingsInfos
