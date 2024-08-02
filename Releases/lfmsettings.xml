@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<AppConfig xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Prefix />
+  <Suffix />
+  <Precision>10</Precision>
+  <DeleteNonInitializedLayouts>false</DeleteNonInitializedLayouts>
+  <ReferenceDimension>185</ReferenceDimension>
+  <TilemodeOn>true</TilemodeOn>
+  <TemplatePath>E:\AutoCAD NET\LayoutsFromModel\Releases\lfmtemplate.dwt</TemplatePath>
+  <BlockName>_РАМКА</BlockName>
+  <TagName>ЛИСТ</TagName>
+  <BlockRatioScale>1</BlockRatioScale>
+  <LockViewPorts>false</LockViewPorts>
+</AppConfig>
