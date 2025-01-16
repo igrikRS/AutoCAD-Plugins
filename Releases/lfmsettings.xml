@@ -6,9 +6,9 @@
   <DeleteNonInitializedLayouts>false</DeleteNonInitializedLayouts>
   <ReferenceDimension>185</ReferenceDimension>
   <TilemodeOn>true</TilemodeOn>
-  <TemplatePath>E:\AutoCAD NET\LayoutsFromModel\Releases\lfmtemplate.dwt</TemplatePath>
+  <TemplatePath>E:\AutoCAD NET\LayoutsFromModel\LayoutsFromModel\bin\Debug\lfmtemplate.dwt</TemplatePath>
   <BlockName>_РАМКА</BlockName>
-  <TagName>ЛИСТ</TagName>
+  <TagName>_ЛИСТ</TagName>
   <BlockRatioScale>1</BlockRatioScale>
   <LockViewPorts>false</LockViewPorts>
 </AppConfig>

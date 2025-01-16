@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-// using Multicad;
+//using Multicad;
 
 using CO = LayoutsFromModel.Properties.CmdOptions;
 
@@ -214,18 +214,21 @@ namespace LayoutsFromModel
              * 72 Стадия Stage
              * 73 Формат Format
              */
-            // McObjectId mcsId = Multicad.McObjectId.FromOldIdPtr(brefId.OldIdPtr);
-            // McFormat _mcFormat = mcsId.GetObject()?.Cast<McFormat>(); // нужно найти библиотеку
-            // McPropertySource mcPropertySource = mcsId.GetObject()?.Cast<McPropertySource>();
-            // McProperties _mcProperties = mcPropertySource.ObjectProperties;
-            // string sDrawingName_ = (string)_mcProperties.GetValueEx("Author", "");
+            //McObjectId mcsId = Multicad.McObjectId.FromOldIdPtr(brefId.OldIdPtr);
+            ////McFormat _mcFormat = mcsId.GetObject()?.Cast<McFormat>(); // нужно найти библиотеку
+            //McPropertySource mcPropertySource = mcsId.GetObject()?.Cast<McPropertySource>();
+            //McProperties _mcProperties = mcPropertySource.ObjectProperties;
+            //string sDrawingName = (string)_mcProperties.GetValueEx("Sheet", "");
 
-			double scale = entity.LinetypeScale;
+            double scale = entity.LinetypeScale;
             double listWidtht = (entity.GeometricExtents.MaxPoint.X - entity.GeometricExtents.MinPoint.X) / scale;
             double listhight = (entity.GeometricExtents.MaxPoint.Y - entity.GeometricExtents.MinPoint.Y) / scale;
 
             ed.WriteMessage("\nСПДС-рамка: {0}x{1} (масштаб: {2})", System.Convert.ToInt32(listWidtht),
                                                                     System.Convert.ToInt32(listhight), scale);
+
+            //ed.WriteMessage("\nСПДС-рамка: {0}x{1} (масштаб: {2}. Лист №{3})", System.Convert.ToInt32(listWidtht),
+            //                                                        System.Convert.ToInt32(listhight), scale, sDrawingName);
 
 
             return new BorderPromptResult(entity.GeometricExtents.MinPoint,

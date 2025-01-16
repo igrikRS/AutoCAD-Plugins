@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3BEED9E3-D50A-4D55-80B9-B480431E59BE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LayoutsFromModel2021</RootNamespace>
+    <AssemblyName>LayoutsFromModel2021</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>..\..\AutoCAD\2021\accoremgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>..\..\AutoCAD\2021\acdbmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>..\..\AutoCAD\2021\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\LayoutsFromModel\BlocksBordersBuilder.cs">
+      <Link>BlocksBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\BorderDrawer.cs">
+      <Link>BorderDrawer.cs</Link>
+      <DependentUpon>IBorderVisitor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\BorderPromptResult.cs">
+      <Link>BorderPromptResult.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\CommandClass.cs">
+      <Link>CommandClass.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Configuration\AppConfig.cs">
+      <Link>Configuration\AppConfig.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Configuration\ConfigurationDialog.xaml.cs">
+      <Link>Configuration\ConfigurationDialog.xaml.cs</Link>
+      <DependentUpon>ConfigurationDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\DrawingBorders.cs">
+      <Link>DrawingBorders.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Extensions\AcadSystemVariableSwitcher.cs">
+      <Link>Extensions\AcadSystemVariableSwitcher.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Extensions\LayersLibrary.cs">
+      <Link>Extensions\LayersLibrary.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Extensions\Zoom.cs">
+      <Link>Extensions\Zoom.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Helpers\AcadPreferencesHelper.cs">
+      <Link>Helpers\AcadPreferencesHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\IBordersCollectionBuilder.cs">
+      <Link>IBordersCollectionBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\IBorderVisitor.cs">
+      <Link>IBorderVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\InitialUserInteraction.cs">
+      <Link>InitialUserInteraction.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\LayoutCreator.cs">
+      <Link>LayoutCreator.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\PlotSettingsInfo.cs">
+      <Link>PlotSettingsInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\PlotSettingsInfoBuilder.cs">
+      <Link>PlotSettingsInfoBuilder.cs</Link>
+      <DependentUpon>PlotSettingsInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\PlotSettingsManager.cs">
+      <Link>PlotSettingsManager.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\PromptResultStatus.cs">
+      <Link>PromptResultStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Properties\CmdOptions.Designer.cs">
+      <Link>Properties\CmdOptions.Designer.cs</Link>
+      <DependentUpon>CmdOptions.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Properties\CmdPrompts.Designer.cs">
+      <Link>Properties\CmdPrompts.Designer.cs</Link>
+      <DependentUpon>CmdPrompts.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\Properties\ErrorMessages.Designer.cs">
+      <Link>Properties\ErrorMessages.Designer.cs</Link>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\UserAutoBlocksBordersBuilder.cs">
+      <Link>UserAutoBlocksBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\UserInputBlocksBordersBuilder.cs">
+      <Link>UserInputBlocksBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\UserInputBordersBuilder.cs">
+      <Link>UserInputBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\UserSpdsFormatBordersBuilder.cs">
+      <Link>UserSpdsFormatBordersBuilder.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="..\LayoutsFromModel\Configuration\ConfigurationDialog.xaml">
+      <Link>Configuration\ConfigurationDialog.xaml</Link>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\LayoutsFromModel\Properties\CmdOptions.resx">
+      <Link>Properties\CmdOptions.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CmdOptions.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\LayoutsFromModel\Properties\CmdPrompts.resx">
+      <Link>Properties\CmdPrompts.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CmdPrompts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\LayoutsFromModel\Properties\ErrorMessages.resx">
+      <Link>Properties\ErrorMessages.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>LayoutsFromModel.Resources</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -42,6 +42,12 @@ namespace LayoutsFromModel
             CreateLayouts(new UserAutoBlocksBordersBuilder());
         }
 
+        //[CommandMethod("igrikCreateLayoutsSpds", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
+        //public void LayoutFromSpdsFormatAuto()
+        //{
+        //    CreateLayouts(new UserSpdsFormatBordersBuilder());
+        //}
+
         private void CreateLayouts(IBordersCollectionBuilder bordersBuilder)
         {
             InitialUserInteraction initial = new InitialUserInteraction();

@@ -115,7 +115,6 @@
     </Compile>
     <Compile Include="BorderPromptResult.cs" />
     <Compile Include="Extensions\LayersLibrary.cs" />
-    <Compile Include="GetProps.cs" />
     <Compile Include="Extensions\AcadSystemVariableSwitcher.cs" />
     <Compile Include="Extensions\Zoom.cs" />
     <Compile Include="UserAutoBlocksBordersBuilder.cs">
@@ -164,6 +163,7 @@
     <Compile Include="UserInputBordersBuilder.cs">
       <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserSpdsFormatBordersBuilder.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

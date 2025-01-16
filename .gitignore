@@ -50,4 +50,9 @@ GetProps.cs
 LayersLibrary.cs
 View.cs
 Git help.txt
+
+# AutoCAD files
 *.dwg
+*.dwl
+*.dwl2
+*.bak
