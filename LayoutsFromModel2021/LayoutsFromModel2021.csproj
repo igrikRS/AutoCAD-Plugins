@@ -7,8 +7,8 @@
     <ProjectGuid>{3BEED9E3-D50A-4D55-80B9-B480431E59BE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LayoutsFromModel2021</RootNamespace>
-    <AssemblyName>LayoutsFromModel2021</AssemblyName>
+    <RootNamespace>LayoutsFromModel</RootNamespace>
+    <AssemblyName>LayoutsFromModel</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -126,6 +126,8 @@
     <Compile Include="..\LayoutsFromModel\Properties\CmdPrompts.Designer.cs">
       <Link>Properties\CmdPrompts.Designer.cs</Link>
       <DependentUpon>CmdPrompts.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="..\LayoutsFromModel\Properties\ErrorMessages.Designer.cs">
       <Link>Properties\ErrorMessages.Designer.cs</Link>

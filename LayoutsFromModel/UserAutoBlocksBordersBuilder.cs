@@ -36,6 +36,9 @@ namespace LayoutsFromModel
             string blockname = GetBordersBlockName();
             string tagname = GetBordersTagName();
 
+            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+            ed.WriteMessage($"\n\nВыбран автоматический поиск блоков с именем \"{blockname}\" и тегом \"{tagname}\"\n");
+
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
                 // Получаем коллекцию ObjectId вхождений блока blockname, затем сортируем
@@ -47,7 +50,6 @@ namespace LayoutsFromModel
                     throw new ArgumentException($"Блоков с именем \"{blockname}\" на чертеже нет!");
                 ObjectId btrId = bt[blockname];
 
-                Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
                 PromptSelectionResult res = ed.SelectImplied();
 
                 // если пользователем выбраны объекты до ввода команды

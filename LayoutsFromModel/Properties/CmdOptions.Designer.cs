@@ -39,7 +39,7 @@ namespace LayoutsFromModel.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LayoutsFromModel2021.Properties.CmdOptions", typeof(CmdOptions).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LayoutsFromModel.Properties.CmdOptions", typeof(CmdOptions).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
