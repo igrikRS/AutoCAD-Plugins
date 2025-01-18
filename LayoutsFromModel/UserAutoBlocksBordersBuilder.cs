@@ -37,7 +37,6 @@ namespace LayoutsFromModel
             string tagname = GetBordersTagName();
 
             Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-            ed.WriteMessage($"\n\nВыбран автоматический поиск блоков с именем \"{blockname}\" и тегом \"{tagname}\"\n");
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
@@ -96,7 +95,14 @@ namespace LayoutsFromModel
                 tr.Commit();
             }
 
-            return borders.ToArray();
+            DrawingBorders[] bordersArray = borders.ToArray();
+
+            if (bordersArray.Length < 1)
+            {
+                ed.WriteMessage($"\n\nБлоков с именем \"{blockname}\" и тегом \"{tagname}\" на чертеже нет!\n");
+            }
+
+            return bordersArray;
         }
 
         private string GetBordersBlockName()
