@@ -177,13 +177,8 @@ namespace LayoutsFromModel
             {
                 return new BorderPromptResult(rs.StringResult);
             }
-            else if (rs.Status == PromptStatus.None)
-            {
-                isBlock = false;
-            }
             else
             {
-                // 
                 isBlock = false;
             }
 

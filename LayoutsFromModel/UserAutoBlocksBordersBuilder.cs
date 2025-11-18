@@ -73,7 +73,7 @@ namespace LayoutsFromModel
                 // выборка блоков и сортировка
                 blockRefIds = blockRefIds
                     .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
-                    .OrderBy(n => AlphanumericCompare(GetBlockAttribute(tr, tagname, n)))
+                    .OrderBy(n => CompareHelper.AlphanumericCompare(GetBlockAttribute(tr, tagname, n)))
                     .Select(n => n.ObjectId);
 
                 int borderIndex = InitialBorderIndex;
@@ -83,9 +83,9 @@ namespace LayoutsFromModel
                     // получаем название листа из его тега ЛИСТ
                     // добавляем префикс и суффикс
                     string borderName = string.Format("{0}{1}{2}",
-                                  Configuration.AppConfig.Instance.Prefix,
-                                  GetBlockAttribute(tr, tagname, (BlockReference)tr.GetObject(brefId, OpenMode.ForRead)),
-                                  Configuration.AppConfig.Instance.Suffix);
+                                Configuration.AppConfig.Instance.Prefix,
+                                GetBlockAttribute(tr, tagname, (BlockReference)tr.GetObject(brefId, OpenMode.ForRead)),
+                                Configuration.AppConfig.Instance.Suffix);
 
 
                     // создаём рамку будущего листа
@@ -272,17 +272,6 @@ namespace LayoutsFromModel
             }
 
             return "";
-        }
-
-        /// <summary>
-        /// Сортировка строковых номеров листов
-        /// © https://stackoverflow.com/questions/5093842/alphanumeric-sorting-using-linq
-        /// </summary>
-        /// <param name="input">Коллекция листов в строковом виде</param>
-        /// <returns></returns>
-        public static string AlphanumericCompare(string input)
-        {
-            return System.Text.RegularExpressions.Regex.Replace(input, "[0-9.]+", match => match.Value.PadLeft(10, '0'));
         }
     }
 }

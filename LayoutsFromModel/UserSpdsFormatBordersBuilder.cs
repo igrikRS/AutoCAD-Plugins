@@ -1,11 +1,4 @@
-﻿/*
- * Description:    Автоматическое создание листов из вхождений блоков на чертеже (только в пространстве модели):
- *                  - все создаваемые листы сортируются в возрастающем порядке по номеру листа (атрибут в блоке)
- *                  - блоки с пустым атрибутом    не используются в создании листов
- *                  - блоки на непечатаемых слоях не используются в создании листов
- *                  - имя листа автоматически берётся из атрибута в блоке
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -17,9 +10,9 @@ using Autodesk.AutoCAD.EditorInput;
 namespace LayoutsFromModel
 {
     /// <summary>
-    /// Класс, создающий коллекцию границ чертежей из вхождений блоков
+    /// Класс, создающий коллекцию границ чертежей из вхождений СПДС-рамок
     /// </summary>
-    /// команда "igrikCreateLayoutsAuto"
+    /// команда "igrikCreateLayoutsSpds"
 
     public class UserSpdsFormatBordersBuilder : IBordersCollectionBuilder
     {

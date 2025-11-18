@@ -92,6 +92,9 @@
     <Compile Include="..\LayoutsFromModel\Helpers\AcadPreferencesHelper.cs">
       <Link>Helpers\AcadPreferencesHelper.cs</Link>
     </Compile>
+    <Compile Include="..\LayoutsFromModel\Helpers\CompareHelper.cs">
+      <Link>Helpers\CompareHelper.cs</Link>
+    </Compile>
     <Compile Include="..\LayoutsFromModel\IBordersCollectionBuilder.cs">
       <Link>IBordersCollectionBuilder.cs</Link>
     </Compile>
