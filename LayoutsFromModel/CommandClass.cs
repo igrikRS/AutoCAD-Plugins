@@ -18,10 +18,10 @@ namespace LayoutsFromModel
     /// </summary>
     public class CommandClass
     {
-        [CommandMethod("igrikOpenInitialConfigDialog", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
-        public void LayoutFromSpdsFormatAuto()
+        [CommandMethodAttribute("igrikCreateLayoutsOptions", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
+        public void OpenInitialConfigDialog()
         {
-            OpenInitialConfigDialog();
+            Configuration.AppConfig.Instance.ShowDialog();
         }
 
         [CommandMethodAttribute("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
@@ -54,11 +54,6 @@ namespace LayoutsFromModel
         //{
         //    CreateLayouts(new UserSpdsFormatBordersBuilder());
         //}
-
-        private void OpenInitialConfigDialog()
-        {
-            Configuration.AppConfig.Instance.ShowDialog();
-        }
 
         private void CreateLayouts(IBordersCollectionBuilder bordersBuilder)
         {
