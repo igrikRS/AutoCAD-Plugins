@@ -1,9 +1,4 @@
-﻿/*
- * User: aleksey.nakoryakov
- * Date: 07.05.13
- * Time: 14:26
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;

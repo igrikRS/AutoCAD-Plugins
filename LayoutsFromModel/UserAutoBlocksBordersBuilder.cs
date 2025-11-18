@@ -180,13 +180,48 @@ namespace LayoutsFromModel
 
                 BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
                 double scale = bref.ScaleFactors.X * blockRatioScale;
-                border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
-                                                             bref.GeometricExtents.MaxPoint,
+                Extents3d geometricExtents = GetBlockGeometricExtents(bref);
+
+                border = DrawingBorders.CreateDrawingBorders(geometricExtents.MinPoint,
+                                                             geometricExtents.MaxPoint,
                                                              name,
                                                              scale);
+
+                // Старый способ получения размеров блока: bref.GeometricExtents.MinPoint и bref.GeometricExtents.MaxPoint
+                // border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
+                //                                              bref.GeometricExtents.MaxPoint,
+                //                                              name,
+                //                                              scale);
                 tr.Commit();
             }
             return border;
+        }
+
+        /// <summary>
+        /// Получить размеры видимой части динамического блока
+        /// </summary>
+        /// <param name="br">Ссылка на блок</param>
+        /// <returns></returns>
+        private Extents3d GetBlockGeometricExtents(BlockReference br)
+        {
+            var extents = new Extents3d();
+            using (var entitySet = new DBObjectCollection())
+            {
+                br.Explode(entitySet);
+                foreach (Entity entity in entitySet)
+                {
+                    if (entity.Visible)
+                    {
+                        var bounds = entity.Bounds;
+                        if (bounds.HasValue)
+                        {
+                            extents.AddExtents(bounds.Value);
+                        }
+                    }
+                    entity.Dispose();
+                }
+            }
+            return extents;
         }
 
         /// <summary>

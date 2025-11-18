@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 // Autodesk
 using Autodesk.AutoCAD.Runtime;
-using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.EditorInput;
+using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 
 [assembly: CommandClass(typeof(LayoutsFromModel.CommandClass))]
 
@@ -17,6 +18,12 @@ namespace LayoutsFromModel
     /// </summary>
     public class CommandClass
     {
+        [CommandMethod("igrikOpenInitialConfigDialog", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
+        public void LayoutFromSpdsFormatAuto()
+        {
+            OpenInitialConfigDialog();
+        }
+
         [CommandMethodAttribute("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         [CommandMethodAttribute("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void LayoutFromUserInput()
@@ -47,6 +54,11 @@ namespace LayoutsFromModel
         //{
         //    CreateLayouts(new UserSpdsFormatBordersBuilder());
         //}
+
+        private void OpenInitialConfigDialog()
+        {
+            Configuration.AppConfig.Instance.ShowDialog();
+        }
 
         private void CreateLayouts(IBordersCollectionBuilder bordersBuilder)
         {

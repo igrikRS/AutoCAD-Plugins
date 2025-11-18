@@ -37,7 +37,6 @@ namespace LayoutsFromModel
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
-
                 // Крутимся, пока нужны новые рамки
                 bool needNewBorder = true;
                 while (needNewBorder)
@@ -54,85 +53,95 @@ namespace LayoutsFromModel
 
                     switch (borderRes.QueryStatus)
                     {
-                    case PromptResultStatus.Cancelled:
-                        // Пользователь нажал escape: отменяем все рамки
-                        ed.WriteMessage("\nОтмена! (кнопкой)");
-                        needNewBorder = false;
+                        // Использованы параметры ком. строки
+                        case PromptResultStatus.Keyword:
 
-                        if (borders.Count > 0)
-                            drawer.ClearData();
+                            // Запускаем процесс создания листов
+                            if (borderRes.StringResult.Equals(CO.Process, StringComparison.InvariantCulture))
+                                needNewBorder = false;
 
-                        borders.Clear();
-                        break;
-
-                    // Использованы параметры ком. строки
-                    case PromptResultStatus.Keyword:
-                        
-
-                        // Запускаем процесс создания листов
-                        if (borderRes.StringResult.Equals(CO.Process, StringComparison.InvariantCulture))
-                            needNewBorder = false;
-
-
-                        // Отменяем последний введённый чертёж
-                        if (borderRes.StringResult.Equals(CO.Undo, StringComparison.InvariantCulture))
-                        {
-                            if (borders.Count > 0)
+                            // Отменяем последний введённый чертёж
+                            if (borderRes.StringResult.Equals(CO.Undo, StringComparison.InvariantCulture))
                             {
-                                borders.RemoveAt(borders.Count - 1);
-                                InitialBorderIndex--;
-
-                                drawer.ClearData();
-                                foreach (DrawingBorders b in borders)
+                                if (borders.Count > 0)
                                 {
-                                    b.Accept(drawer);
+                                    borders.RemoveAt(borders.Count - 1);
+                                    InitialBorderIndex--;
+
+                                    drawer.ClearData();
+                                    ed.Regen();
+
+                                    foreach (DrawingBorders b in borders)
+                                    {
+                                        b.Accept(drawer);
+                                    }
+                                }
+                                else
+                                {
+                                    ed.WriteMessage("\nНечего возвращать");
                                 }
                             }
-                            else
-                            {
-                                ed.WriteMessage("\nНечего возвращать");
-                            }
-                        }
 
-                        // Выходим из команды
-                        if (borderRes.StringResult.Equals(CO.Cancel, StringComparison.InvariantCulture))
-                        {
-                            ed.WriteMessage("\nОтмена!");
-                            drawer.ClearData();
-                            borders.Clear();
-                            tr.Commit();
-                            return borders.ToArray();
-                        }
-                        break;
+                            // Выходим из команды
+                            if (borderRes.StringResult.Equals(CO.Cancel, StringComparison.InvariantCulture))
+                            {
+                                ed.WriteMessage("\nОтмена!");
+                                InitialBorderIndex = 0;
+                                drawer.ClearData();
+                                borders.Clear();
+                                tr.Commit();
+                                ed.Regen();
+                                return borders.ToArray();
+                            }
+                            break;
 
                         case PromptResultStatus.OK:
-                        // Введены точки
-                        string bordername = string.Format("{0}{1}{2}", cfg.Prefix, InitialBorderIndex++, cfg.Suffix);
-                        DrawingBorders border =
-                            DrawingBorders.CreateDrawingBorders(borderRes.FirstPoint,
-                                                                borderRes.SecondPoint,
-                                                                bordername,
-                                                                borderRes.GetScale);
-                        ed.WriteMessage("\nДобавляем лист {0}. Формат листа: {1}", bordername, border.PSInfo.Name);
-                        borders.Add(border);
-                        border.Accept(drawer);
+                            // Введены точки
+                            string bordername = string.Format("{0}{1}{2}", cfg.Prefix, InitialBorderIndex++, cfg.Suffix);
+                            DrawingBorders border =
+                                DrawingBorders.CreateDrawingBorders(borderRes.FirstPoint,
+                                                                    borderRes.SecondPoint,
+                                                                    bordername,
+                                                                    borderRes.GetScale);
+                            ed.WriteMessage("\nДобавляем лист {0}. Формат листа: {1}", bordername, border.PSInfo.Name);
+                            borders.Add(border);
+                            border.Accept(drawer);
 
-                        break;
-                    default:
-                        throw new System.Exception("Invalid value for BorderPromptResultStaus in file UserInputBlocksBordersBuilder.cs");                                
-                      }                
+                            break;
+
+                        case PromptResultStatus.Cancelled:
+                            // Пользователь нажал escape: отменяем все рамки
+                            ed.WriteMessage("\nОтмена! (кнопкой)");
+                            needNewBorder = false;
+
+                            if (borders.Count > 0)
+                            {
+                                InitialBorderIndex = 0;
+                                drawer.ClearData();
+                            }
+
+                            borders.Clear();
+                            ed.Regen();
+                            break;
+
+                        default:
+                            throw new System.Exception("Invalid value for BorderPromptResultStaus in file UserInputBlocksBordersBuilder.cs");
+                    }
                 }
 
                 if (borders.Count > 0)
+                {
+                    InitialBorderIndex = 0;
                     drawer.ClearData();
+                }
 
                 tr.Commit();
             }
-            
+
             return borders.ToArray();
         }
 
-        
+
         BorderPromptResult GetBlockBorder(Transaction tr, ref bool isBlock)
         {
             PromptEntityOptions opt = new PromptEntityOptions("\nУкажите рамку формата листа:");
@@ -140,7 +149,7 @@ namespace LayoutsFromModel
             opt.Keywords.Add(CO.Process);
             opt.Keywords.Add(CO.Undo);
             opt.Keywords.Add(CO.Cancel);
-            // opt.AppendKeywordsToMessage = false;
+            // opt.AppendKeywordsToMessage = true;
             // opt.AllowNone = true;
             // opt.Keywords.Add("Set value");
             // opt.Keywords.Add("30");
@@ -167,6 +176,15 @@ namespace LayoutsFromModel
             else if (rs.Status == PromptStatus.Keyword)
             {
                 return new BorderPromptResult(rs.StringResult);
+            }
+            else if (rs.Status == PromptStatus.None)
+            {
+                isBlock = false;
+            }
+            else
+            {
+                // 
+                isBlock = false;
             }
 
             return new BorderPromptResult();

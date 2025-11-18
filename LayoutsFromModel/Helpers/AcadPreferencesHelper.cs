@@ -20,20 +20,22 @@ namespace LayoutsFromModel
             object preferences = acadObject.GetType().InvokeMember("Preferences",
                                                                    BindingFlags.GetProperty,
                                                                    null, acadObject, null);
-            object display =
-                preferences.GetType().InvokeMember("Display",
-                                                   BindingFlags.GetProperty,
-                                                   null, preferences, null);
+
+            object display = preferences.GetType().InvokeMember("Display",
+                                                                BindingFlags.GetProperty,
+                                                                null, preferences, null);
             object layoutProperty = display
                 .GetType().InvokeMember("LayoutCreateViewport",
                                         BindingFlags.GetProperty,
                                         null, display, null);
+
             bool layoutCreateViewportProperty = Convert.ToBoolean(layoutProperty);
             object[] dataArray = new object[] { newValue };
-            display.GetType()
-                .InvokeMember("LayoutCreateViewport",
-                              BindingFlags.SetProperty,
-                              null, display, dataArray);
+
+            display.GetType().InvokeMember("LayoutCreateViewport",
+                                            BindingFlags.SetProperty,
+                                            null, display, dataArray);
+
             return layoutCreateViewportProperty;
         }
     }

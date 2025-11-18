@@ -1,9 +1,4 @@
-﻿/*
- * User: aleksey
- * Date: 01.05.2013
- * Time: 15:09
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Colors;
@@ -67,12 +62,14 @@ namespace LayoutsFromModel
 		public void ClearData()
 		{
 			TransientManager tm = TransientManager.CurrentTransientManager;
-			if (this.objects != null || this.objects.Count != 0)
+			if (tm != null && this.objects != null || this.objects.Count != 0)
 			{
 				tm.EraseTransients(TransientDrawingMode.Highlight, 128, new IntegerCollection());
 				tm.EraseTransients(TransientDrawingMode.DirectShortTerm, 256, new IntegerCollection());
 				foreach (Drawable obj in this.objects)
+				{
 					obj.Dispose();
+				}
 				this.objects.Clear();
 			}
 		}

@@ -84,7 +84,6 @@ namespace LayoutsFromModel
             using (Transaction tr = this.wdb.TransactionManager.StartTransaction())
             {
                 CreateViewport(layout, borders, tr);
-
                 tr.Commit();
             }
         }
@@ -126,7 +125,7 @@ namespace LayoutsFromModel
         /// </summary>
         /// <param name="inputName">Название листа</param>
         /// <returns>Корректное имя листа</returns>
-        string CheckLayoutName(string inputName)
+        private string CheckLayoutName(string inputName)
         {
             string layoutName = Regex.Replace(inputName, @"(=|,|;|\@|:|\?|\*|\[|\]|<|>|#|""|%|\/|\||\\)", "");
             if (string.IsNullOrEmpty(layoutName)) layoutName = string.Format("Y{0}", this.counter);
@@ -157,7 +156,7 @@ namespace LayoutsFromModel
         /// <param name="borders">Объект границ чертежа</param>
         /// <param name="tr">Текущая транзакция</param>
         /// <returns>Настройки печати, соответствующие границам чертежа</returns>
-        PlotSettings ImportPlotSettings(DrawingBorders borders, Transaction tr)
+        private PlotSettings ImportPlotSettings(DrawingBorders borders, Transaction tr)
         {
             PlotSettings ps = new PlotSettings(false);
             ps.CopyFrom(borders.PSInfo.PSettings);
@@ -179,44 +178,49 @@ namespace LayoutsFromModel
         /// </summary>
         /// <param name="layout">Layout, на котором создаётся viewport</param>
         /// <param name="borders">Границы выделенной области в модели</param>
-        void CreateViewport(Layout layout, DrawingBorders borders, Transaction tr)
+        private void CreateViewport(Layout layout, DrawingBorders borders, Transaction tr, bool isLastLayout = true)
         {
             int vpCount = layout.GetViewports().Count;
             if (vpCount == 0)
             {
                 throw new System.Exception(String.Format("Layout {0} не инициализирован", layout.LayoutName));
+                // Если еще нет ни одного Viewport у Layout, то нужно его инициализировать
+                // layout.UpgradeOpen();
+                // layout.Initialize();
+                // layout.DowngradeOpen();
+                // vpCount = layout.GetViewports().Count;
             }
-            Viewport vp;
+            Viewport viewport;
             if (vpCount == 1)
             {
-                BlockTableRecord lbtr =
-                    (BlockTableRecord)tr.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite);
-                vp = new Viewport();
-                vp.SetDatabaseDefaults();
-                lbtr.AppendEntity(vp);
-                tr.AddNewlyCreatedDBObject(vp, true);
-                vp.On = true; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
+                BlockTableRecord paperSpace =
+                    (BlockTableRecord)tr.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite) as BlockTableRecord;
+                viewport = new Viewport();
+                viewport.SetDatabaseDefaults();
+                paperSpace.AppendEntity(viewport);
+                tr.AddNewlyCreatedDBObject(viewport, true);
+                viewport.On = isLastLayout; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
             }
             else
             {
-                ObjectId vpId = layout.GetViewports()[vpCount - 1];
-                if (vpId.IsNull)
+                ObjectId viewportId = layout.GetViewports()[vpCount - 1];
+                if (viewportId.IsNull)
                     throw new System.Exception("Не удалось получить вьюпорт!");
 
-                vp = (Viewport)tr.GetObject(vpId, OpenMode.ForWrite);
-                if (vp == null)
+                viewport = (Viewport)tr.GetObject(viewportId, OpenMode.ForWrite);
+                if (viewport == null)
                     throw new System.Exception("Не удалось получить вьюпорт!");
             }
             // Высоту и ширину вьюпорта выставляем в размер выделенной области
-            vp.Height = borders.Height / borders.ScaleFactor;
-            vp.Width = borders.Width / borders.ScaleFactor;
-            vp.CenterPoint = new Point3d(vp.Width / 2 + layout.PlotOrigin.X,
-                                         vp.Height / 2 + layout.PlotOrigin.Y,
+            viewport.Height = borders.Height / borders.ScaleFactor;
+            viewport.Width = borders.Width / borders.ScaleFactor;
+            viewport.CenterPoint = new Point3d(viewport.Width / 2 + layout.PlotOrigin.X,
+                                         viewport.Height / 2 + layout.PlotOrigin.Y,
                                          0);
-            vp.ViewTarget = new Point3d(0, 0, 0);
-            vp.ViewHeight = borders.Height;
-            vp.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
-            vp.Locked = LayoutsFromModel.Configuration.AppConfig.Instance.LockViewPorts;
+            viewport.ViewTarget = new Point3d(0, 0, 0);
+            viewport.ViewHeight = borders.Height;
+            viewport.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
+            viewport.Locked = LayoutsFromModel.Configuration.AppConfig.Instance.LockViewPorts;
         }
 
     }

@@ -149,6 +149,7 @@
     </Compile>
     <Compile Include="..\LayoutsFromModel\UserSpdsFormatBordersBuilder.cs">
       <Link>UserSpdsFormatBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

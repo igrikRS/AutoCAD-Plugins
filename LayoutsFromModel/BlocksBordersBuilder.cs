@@ -1,9 +1,4 @@
-﻿/*
- * User: aleksey.nakoryakov
- * Date: 13.05.13
- * Time: 14:39
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -73,6 +68,9 @@ namespace LayoutsFromModel
             return borders.ToArray();
         }
 
+        /// <summary>
+        /// Получить название блока-рамки из конфигурации
+        /// </summary>
         private string GetBordersBlockName()
         {
             string blockname = Configuration.AppConfig.Instance.BlockName;
@@ -82,6 +80,9 @@ namespace LayoutsFromModel
             return blockname;
         }
 
+        /// <summary>
+        /// Получить список вхождений блоков на чертеже по его идентификатору
+        /// </summary>
         private List<ObjectId> GetBlockReferences(ObjectId blockId)
         {
             List<ObjectId> result = null;

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LayoutsFromModel</RootNamespace>
     <AssemblyName>LayoutsFromModel</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -143,6 +143,10 @@
     </Compile>
     <Compile Include="..\LayoutsFromModel\UserInputBordersBuilder.cs">
       <Link>UserInputBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\UserSpdsFormatBordersBuilder.cs">
+      <Link>UserSpdsFormatBordersBuilder.cs</Link>
       <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
