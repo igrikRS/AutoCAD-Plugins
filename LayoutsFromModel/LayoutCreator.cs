@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-// using System.Xaml;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.ApplicationServices;
-
 
 namespace LayoutsFromModel
 {
@@ -46,9 +43,9 @@ namespace LayoutsFromModel
                 {
                     layout = tr.GetObject(lm.CreateLayout(layoutName), OpenMode.ForWrite) as Layout;
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
-                    throw new System.Exception(String.Format("Ошибка создания Layout {0}\n{1}", layoutName, ex.Message));
+                    throw new Exception(string.Format("Ошибка создания Layout {0}\n{1}", layoutName, ex.Message));
                 }
 
                 // получаем данные для создания настроек плоттера
@@ -89,32 +86,54 @@ namespace LayoutsFromModel
         }
 
         /// <summary>
-        /// Метод удаляет неинициализированные листы
+        /// Метод создаёт Viewport на заданном Layout, в размер листа
         /// </summary>
-        public void DeleteNoninitializedLayouts()
+        /// <param name="layout">Layout, на котором создаётся viewport</param>
+        /// <param name="borders">Границы выделенной области в модели</param>
+        public void CreateViewport(Layout layout, DrawingBorders borders, Transaction tr)
         {
-            using (Transaction tr = wdb.TransactionManager.StartTransaction())
+            int vpCount = layout.GetViewports().Count;
+            if (vpCount == 0)
             {
-                DBDictionary dic = (DBDictionary)tr.GetObject(wdb.LayoutDictionaryId, OpenMode.ForRead);
-                foreach (DBDictionaryEntry entry in dic)
-                {
-                    Layout layout = (Layout)tr.GetObject(entry.Value, OpenMode.ForRead);
-                    if (!layout.ModelType && layout.GetViewports().Count == 0)
-                    {
-                        if (dic.Count > 1)
-                        {
-                            if (!dic.IsWriteEnabled)
-                                dic.UpgradeOpen();
-                            dic.Remove(entry.Value);
-                            layout.UpgradeOpen();
-                            layout.Erase(true);
-                            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager
-                                .MdiActiveDocument.Editor.WriteMessage("\nУдаляю лист " + layout.LayoutName + Environment.NewLine);
-                        }
-                    }
-                }
-                tr.Commit();
+                throw new Exception(string.Format("Layout {0} не инициализирован", layout.LayoutName));
+                // Если еще нет ни одного Viewport у Layout, то нужно его инициализировать
+                // layout.UpgradeOpen();
+                // layout.Initialize();
+                // layout.DowngradeOpen();
+                // vpCount = layout.GetViewports().Count;
             }
+            Viewport viewport;
+            if (vpCount == 1)
+            {
+                BlockTableRecord paperSpace =
+                    (BlockTableRecord)tr.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite);
+                viewport = new Viewport();
+                viewport.SetDatabaseDefaults();
+                paperSpace.AppendEntity(viewport);
+                tr.AddNewlyCreatedDBObject(viewport, true);
+                viewport.On = true; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
+            }
+            else
+            {
+                string exceptionMessage = "Не удалось получить вьюпорт!";
+                ObjectId viewportId = layout.GetViewports()[vpCount - 1];
+                if (viewportId.IsNull)
+                    throw new Exception(exceptionMessage);
+
+                viewport = (Viewport)tr.GetObject(viewportId, OpenMode.ForWrite);
+                if (viewport == null)
+                    throw new Exception(exceptionMessage);
+            }
+            // Высоту и ширину вьюпорта выставляем в размер выделенной области
+            viewport.Height = borders.Height / borders.ScaleFactor;
+            viewport.Width = borders.Width / borders.ScaleFactor;
+            viewport.CenterPoint = new Point3d(viewport.Width / 2 + layout.PlotOrigin.X,
+                                              viewport.Height / 2 + layout.PlotOrigin.Y,
+                                              0);
+            viewport.ViewTarget = new Point3d(0, 0, 0);
+            viewport.ViewHeight = borders.Height;
+            viewport.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
+            viewport.Locked = Configuration.AppConfig.Instance.LockViewPorts;
         }
 
         /// <summary>
@@ -127,8 +146,10 @@ namespace LayoutsFromModel
         /// <returns>Корректное имя листа</returns>
         private string CheckLayoutName(string inputName)
         {
+            string templateFormat = "{0}({1})";
             string layoutName = Regex.Replace(inputName, @"(=|,|;|\@|:|\?|\*|\[|\]|<|>|#|""|%|\/|\||\\)", "");
             if (string.IsNullOrEmpty(layoutName)) layoutName = string.Format("Y{0}", this.counter);
+
             using (Transaction tr = this.wdb.TransactionManager.StartTransaction())
             {
                 // Проверяем на наличие листа с указанным именем
@@ -137,11 +158,11 @@ namespace LayoutsFromModel
                 {
                     // Если есть - добавляем номер в скобках, итерируем номер, пока имя не станет уникальным
                     int dublicateLayoutIndex = 1;
-                    while (layoutsDic.Contains(string.Format("{0}({1})", layoutName, dublicateLayoutIndex)))
+                    while (layoutsDic.Contains(string.Format(templateFormat, layoutName, dublicateLayoutIndex)))
                     {
                         ++dublicateLayoutIndex;
                     }
-                    layoutName = string.Format("{0}({1})", layoutName, dublicateLayoutIndex);
+                    layoutName = string.Format(templateFormat, layoutName, dublicateLayoutIndex);
                 }
                 tr.Commit();
             }
@@ -174,53 +195,32 @@ namespace LayoutsFromModel
         }
 
         /// <summary>
-        /// Метод создаёт Viewport на заданном Layout, в размер листа
+        /// Метод удаляет неинициализированные листы
         /// </summary>
-        /// <param name="layout">Layout, на котором создаётся viewport</param>
-        /// <param name="borders">Границы выделенной области в модели</param>
-        private void CreateViewport(Layout layout, DrawingBorders borders, Transaction tr, bool isLastLayout = true)
+        public void DeleteNoninitializedLayouts()
         {
-            int vpCount = layout.GetViewports().Count;
-            if (vpCount == 0)
+            using (Transaction tr = wdb.TransactionManager.StartTransaction())
             {
-                throw new System.Exception(String.Format("Layout {0} не инициализирован", layout.LayoutName));
-                // Если еще нет ни одного Viewport у Layout, то нужно его инициализировать
-                // layout.UpgradeOpen();
-                // layout.Initialize();
-                // layout.DowngradeOpen();
-                // vpCount = layout.GetViewports().Count;
+                DBDictionary dic = (DBDictionary)tr.GetObject(wdb.LayoutDictionaryId, OpenMode.ForRead);
+                foreach (DBDictionaryEntry entry in dic)
+                {
+                    Layout layout = (Layout)tr.GetObject(entry.Value, OpenMode.ForRead);
+                    if (!layout.ModelType && layout.GetViewports().Count == 0)
+                    {
+                        if (dic.Count > 1)
+                        {
+                            if (!dic.IsWriteEnabled)
+                                dic.UpgradeOpen();
+                            dic.Remove(entry.Value);
+                            layout.UpgradeOpen();
+                            layout.Erase(true);
+                            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager
+                                .MdiActiveDocument.Editor.WriteMessage("\nУдаляю лист " + layout.LayoutName + Environment.NewLine);
+                        }
+                    }
+                }
+                tr.Commit();
             }
-            Viewport viewport;
-            if (vpCount == 1)
-            {
-                BlockTableRecord paperSpace =
-                    (BlockTableRecord)tr.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite) as BlockTableRecord;
-                viewport = new Viewport();
-                viewport.SetDatabaseDefaults();
-                paperSpace.AppendEntity(viewport);
-                tr.AddNewlyCreatedDBObject(viewport, true);
-                viewport.On = isLastLayout; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
-            }
-            else
-            {
-                ObjectId viewportId = layout.GetViewports()[vpCount - 1];
-                if (viewportId.IsNull)
-                    throw new System.Exception("Не удалось получить вьюпорт!");
-
-                viewport = (Viewport)tr.GetObject(viewportId, OpenMode.ForWrite);
-                if (viewport == null)
-                    throw new System.Exception("Не удалось получить вьюпорт!");
-            }
-            // Высоту и ширину вьюпорта выставляем в размер выделенной области
-            viewport.Height = borders.Height / borders.ScaleFactor;
-            viewport.Width = borders.Width / borders.ScaleFactor;
-            viewport.CenterPoint = new Point3d(viewport.Width / 2 + layout.PlotOrigin.X,
-                                         viewport.Height / 2 + layout.PlotOrigin.Y,
-                                         0);
-            viewport.ViewTarget = new Point3d(0, 0, 0);
-            viewport.ViewHeight = borders.Height;
-            viewport.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
-            viewport.Locked = LayoutsFromModel.Configuration.AppConfig.Instance.LockViewPorts;
         }
 
     }

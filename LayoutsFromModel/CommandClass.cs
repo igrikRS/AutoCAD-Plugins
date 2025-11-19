@@ -1,8 +1,8 @@
 ﻿// Microsoft
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Diagnostics;
 
 // Autodesk
 using Autodesk.AutoCAD.Runtime;
@@ -18,14 +18,14 @@ namespace LayoutsFromModel
     /// </summary>
     public class CommandClass
     {
-        [CommandMethodAttribute("igrikCreateLayoutsOptions", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
+        [CommandMethod("igrikCreateLayoutsOptions", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void OpenInitialConfigDialog()
         {
             Configuration.AppConfig.Instance.ShowDialog();
         }
 
-        [CommandMethodAttribute("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
-        [CommandMethodAttribute("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
+        [CommandMethod("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
+        [CommandMethod("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void LayoutFromUserInput()
         {
             CreateLayouts(new UserInputBordersBuilder());
@@ -37,7 +37,7 @@ namespace LayoutsFromModel
             CreateLayouts(new BlocksBordersBuilder());
         }
 
-        [CommandMethodAttribute("igrikCreateLayoutsSelect", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
+        [CommandMethod("igrikCreateLayoutsSelect", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void LayoutFromUserInputBlocks()
         {
             CreateLayouts(new UserInputBlocksBordersBuilder());
@@ -62,11 +62,11 @@ namespace LayoutsFromModel
             if (initial.InitialDataStatus == PromptResultStatus.Cancelled)
                 return;
             initial.FillPlotInfoManager();
-            bordersBuilder.InitialBorderIndex = initial.Index;
+            bordersBuilder.InitialBorderIndex = initial.index;
             DrawingBorders[] borders = bordersBuilder.GetDrawingBorders();
             if (borders.Length == 0)
             {
-                acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nНе выбран ни один чертёж");
+                acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nОтсутствуют элементы для создания листов");
                 return;
             }
 
@@ -94,8 +94,9 @@ namespace LayoutsFromModel
             if (cfg.DeleteNonInitializedLayouts)
             {
                 layoutCreator.DeleteNoninitializedLayouts();
-                ed.Regen();
             }
+
+            ed.Regen();
         }
 
     }

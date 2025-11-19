@@ -19,13 +19,13 @@ namespace LayoutsFromModel
 
         Editor ed;
 
-        public int Index { get; set; }
+        public int index { get; set; }
 
         public PromptResultStatus InitialDataStatus { get; private set; }
 
         public InitialUserInteraction()
         {
-            this.Index = 1;
+            this.index = 1;
             this.useTemplate = false;
             this.ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
         }
@@ -52,14 +52,14 @@ namespace LayoutsFromModel
 
                 pio.AllowNegative = false;
                 pio.AllowNone = false;
-                pio.DefaultValue = this.Index;
+                pio.DefaultValue = this.index;
                 piRes = ed.GetInteger(pio);
                 // TODO Обрабатывать выход по escape
                 switch (piRes.Status)
                 {
                     // Введён номер - продолжаем
                     case PromptStatus.OK:
-                        this.Index = piRes.Value;
+                        this.index = piRes.Value;
                         exitLoop = true;
                         break;
                     // Отрабатываем ключевые слова
