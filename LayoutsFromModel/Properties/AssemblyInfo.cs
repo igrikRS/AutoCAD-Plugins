@@ -9,12 +9,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LayoutsFromModel Extended")]
+[assembly: AssemblyTitle("LayoutsFromModel 2019 Extended")]
 [assembly: AssemblyDescription("AutoCAD plugin. Создание листов из чертежей, оформленных в модели. http://forum.dwg.ru/showthread.php?t=83750")]
 [assembly: AssemblyConfiguration("Configuration")]
 [assembly: AssemblyCompany("Company")]
-[assembly: AssemblyProduct("LayoutsFromModel")]
-[assembly: AssemblyCopyright("bargool (©2013) and igrik (©2019)")]
+[assembly: AssemblyProduct("LayoutsFromModel 2019")]
+[assembly: AssemblyCopyright("bargool (©2013) and igrik (©2026)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -28,4 +28,5 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can use the default the Revision and 
 // Build Numbers by using the '*' as shown below:
-[assembly: AssemblyVersion("3.0.0.0")]
+[assembly: AssemblyVersion("4.0.0.0")]
+[assembly: AssemblyFileVersion("4.0.0.0")]

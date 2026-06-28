@@ -141,7 +141,9 @@ namespace LayoutsFromModel
             return borders.ToArray();
         }
 
-
+        /// <summary>
+        /// Получить границы блока/формата СПДС
+        /// </summary>
         BorderPromptResult GetBlockBorder(Transaction tr, ref bool isBlock)
         {
             PromptEntityOptions opt = new PromptEntityOptions("\nУкажите рамку формата листа:");
@@ -185,9 +187,10 @@ namespace LayoutsFromModel
             return new BorderPromptResult();
         }
 
-
-        // Функция получения рамки из блока-рамки
-        // Важно!!! Атрибуты и дин. параметры не должны вылезать за пределы геометрии рамки
+        /// <summary>
+        /// Получить границы блока. 
+        /// Важно!!! Атрибуты и дин. параметры не должны вылезать за пределы геометрии рамки
+        /// </summary>
         BorderPromptResult GetBlockBorder(Transaction tr, ObjectId brefId)
         {
             BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
@@ -213,10 +216,33 @@ namespace LayoutsFromModel
                                             scale);
         }
 
-        // функция получения рамки из формата СПДС
+        /// <summary>
+        /// Получить границы рамки из формата СПДС
+        /// </summary>
         BorderPromptResult GetSPDSFormatBorder(Transaction tr, ObjectId brefId)
         {
             Entity entity = (Entity)tr.GetObject(brefId, OpenMode.ForRead);
+
+            // if (entity.HasFields)
+            // {
+            //     const string code = "Sheet";
+            //     ObjectId fieldId = entity.GetField(code);
+            //     Field field = tr.GetObject(fieldId, OpenMode.ForRead) as Field;
+
+            //     if (field != null)
+            //     {
+            //         string value = field.GetStringValue();
+            //         ed.WriteMessage("\nCode: {0} Value: {1}", code, value);
+            //     }
+            //     else
+            //     {
+            //         ed.WriteMessage($"\nField Sheet is not found!");
+            //     }
+            // }
+            // else
+            // {
+            //     ed.WriteMessage("\nEntity not HasFields!");
+            // }
 
             /** получение данных о форматке:
              * 21 Разработал Author
