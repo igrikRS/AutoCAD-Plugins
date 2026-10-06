@@ -17,8 +17,6 @@ namespace LayoutsFromModel
     /// <summary>
     /// Класс, создающий коллекцию границ чертежей из вхождений блоков
     /// </summary>
-    /// команда "igrikCreateLayoutsAuto"
-
     public class UserAutoBlocksBordersBuilder : IBordersCollectionBuilder
     {
         private Database _wdb = HostApplicationServices.WorkingDatabase;
@@ -32,67 +30,80 @@ namespace LayoutsFromModel
         public DrawingBorders[] GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
+            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager
+                .MdiActiveDocument.Editor;
+            string blockname = string.Empty;
+            string tagname = string.Empty;
 
-            string blockname = GetBordersBlockName();
-            string tagname = GetBordersTagName();
-
-            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-
-            using (Transaction tr = _wdb.TransactionManager.StartTransaction())
+            try
             {
-                // Получаем коллекцию ObjectId вхождений блока blockname, затем сортируем
-                IEnumerable<ObjectId> blockRefIds = null;
+                blockname = GetBordersBlockName();
+                tagname = GetBordersTagName();
 
-                // открываем таблицу блоков только на чтение
-                BlockTable bt = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
-                if (!bt.Has(blockname))
-                    throw new ArgumentException($"Блоков с именем \"{blockname}\" на чертеже нет!");
-                ObjectId btrId = bt[blockname];
-
-                PromptSelectionResult res = ed.SelectImplied();
-
-                // если пользователем выбраны объекты до ввода команды
-                // ищем экземпляры блока только из пользоват.выборки
-                if (res.Status == PromptStatus.OK)
+                using (Transaction tr = _wdb.TransactionManager.StartTransaction())
                 {
-                    LayerTable lt = tr.GetObject(_wdb.LayerTableId, OpenMode.ForRead) as LayerTable;
+                    IEnumerable<ObjectId> blockRefIds = null;
 
-                    blockRefIds = res.Value
-                        .GetObjectIds()
-                        .Where(id => id.ObjectClass.Name == "AcDbBlockReference")
-                        .Where(id => ((BlockReference)tr.GetObject(id, OpenMode.ForRead)).DynamicBlockTableRecord == btrId)
-                        .Where(id => IsBlockHasAttribute(tr, tagname, (BlockReference)tr.GetObject(id, OpenMode.ForRead)));
-                        // .Where(id => ((LayerTableRecord)tr.GetObject(lt[id.Layer], OpenMode.ForRead)).IsPlottable );
+                    BlockTable bt = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
+                    if (!bt.Has(blockname))
+                    {
+                        ed.WriteMessage(
+                            "\nБлоков с именем \"{0}\" на чертеже нет!\n",
+                            blockname);
+                        return borders.ToArray();
+                    }
+                    ObjectId btrId = bt[blockname];
+
+                    PromptSelectionResult res = ed.SelectImplied();
+
+                    if (res.Status == PromptStatus.OK)
+                    {
+                        blockRefIds = res.Value
+                            .GetObjectIds()
+                            .Where(id => id.ObjectClass.Name == "AcDbBlockReference")
+                            .Where(id => ((BlockReference)tr.GetObject(id, OpenMode.ForRead)).DynamicBlockTableRecord == btrId)
+                            .Where(id => IsBlockHasAttribute(tr, tagname, (BlockReference)tr.GetObject(id, OpenMode.ForRead)));
+                    }
+                    else
+                    {
+                        blockRefIds = GetBlockAllReferences(btrId);
+                    }
+
+                    blockRefIds = blockRefIds
+                        .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
+                        .OrderBy(n => CompareHelper.AlphanumericCompare(GetBlockAttribute(tr, tagname, n)))
+                        .Select(n => n.ObjectId)
+                        .ToArray();
+
+                    foreach (var brefId in blockRefIds)
+                    {
+                        try
+                        {
+                            string borderName = string.Format("{0}{1}{2}",
+                                        Configuration.AppConfig.Instance.Prefix,
+                                        GetBlockAttribute(tr, tagname, (BlockReference)tr.GetObject(brefId, OpenMode.ForRead)),
+                                        Configuration.AppConfig.Instance.Suffix);
+
+                            borders.Add(CreateBorder(brefId, borderName));
+                        }
+                        catch (Exception ex)
+                        {
+                            ed.WriteMessage(
+                                "\nПропущен блок {0}: {1}",
+                                brefId.Handle,
+                                ex.Message);
+                        }
+                    }
+
+                    tr.Commit();
                 }
-                else
-                {
-                    // сбор всех существующих "экземпляров" блока по его "типу класса" в модели
-                    blockRefIds = GetBlockAllReferences(btrId);
-                }
-
-                // выборка блоков и сортировка
-                blockRefIds = blockRefIds
-                    .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
-                    .OrderBy(n => CompareHelper.AlphanumericCompare(GetBlockAttribute(tr, tagname, n)))
-                    .Select(n => n.ObjectId);
-
-                int borderIndex = InitialBorderIndex;
-
-                foreach (var brefId in blockRefIds)
-                {
-                    // получаем название листа из его тега ЛИСТ
-                    // добавляем префикс и суффикс
-                    string borderName = string.Format("{0}{1}{2}",
-                                Configuration.AppConfig.Instance.Prefix,
-                                GetBlockAttribute(tr, tagname, (BlockReference)tr.GetObject(brefId, OpenMode.ForRead)),
-                                Configuration.AppConfig.Instance.Suffix);
-
-
-                    // создаём рамку будущего листа
-                    borders.Add(CreateBorder(brefId, borderName));
-                }
-
-                tr.Commit();
+            }
+            catch (Exception ex)
+            {
+                ed.WriteMessage(
+                    "\nНе удалось автоматически обработать блоки: {0}\n",
+                    ex.Message);
+                return borders.ToArray();
             }
 
             DrawingBorders[] bordersArray = borders.ToArray();
@@ -105,6 +116,9 @@ namespace LayoutsFromModel
             return bordersArray;
         }
 
+        /// <summary>
+        /// Возвращает настроенное имя блока-рамки.
+        /// </summary>
         private string GetBordersBlockName()
         {
             string blockname = Configuration.AppConfig.Instance.BlockName;
@@ -114,6 +128,9 @@ namespace LayoutsFromModel
             return blockname;
         }
 
+        /// <summary>
+        /// Возвращает настроенное имя атрибута номера листа.
+        /// </summary>
         private string GetBordersTagName()
         {
             string tagname = Configuration.AppConfig.Instance.TagName;
@@ -123,32 +140,25 @@ namespace LayoutsFromModel
             return tagname;
         }
 
+        /// <summary>
+        /// Возвращает подходящие вхождения блока из пространства модели.
+        /// </summary>
         private List<ObjectId> GetBlockAllReferences(ObjectId blockId)
         {
             string tagname = GetBordersTagName();
-            // создаём список (пустой)
             List<ObjectId> result = null;
-            // открываем транзакцию
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
-                // получаем указатель на таблицу копий блоков в конкретном месте (будем получать из модели)
                 BlockTableRecord btr = (BlockTableRecord)tr.GetObject(blockId, OpenMode.ForRead);
-                // указатель на общую таблицу блоков в чертеже (в базе данных чертежа)
                 BlockTable bt = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
                 ObjectId modelId = ((BlockTableRecord)tr
                                     .GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForRead)).ObjectId;
 
                 LayerTable lt = tr.GetObject(_wdb.LayerTableId, OpenMode.ForRead) as LayerTable;
 
-                // собираем коллекцию блоков:
-                // 1) получаем все вхождения
-                // 2) сравниваем место расположения (n.OwnerId == modelId)
-                // 3) получаем id объекта
-                // 4) заносим в список тех, кто выполняет наши условия
                 result = btr.GetAllBlockReferenceIds(true)
                     .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
-                    // * итератор * * если в модели *    * блок динамический *                   * не лежит на непечатаемом слое *
-                    .Where(n => (n.OwnerId == modelId /* && n.IsDynamicBlock*/  && ((LayerTableRecord)tr.GetObject(lt[n.Layer], OpenMode.ForRead)).IsPlottable 
+                    .Where(n => (n.OwnerId == modelId && ((LayerTableRecord)tr.GetObject(lt[n.Layer], OpenMode.ForRead)).IsPlottable
                                                                           && IsBlockHasAttribute(tr, tagname, n) ))
                     .Select(n => n.ObjectId)
                     .ToList();
@@ -170,7 +180,6 @@ namespace LayoutsFromModel
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
-                // получаем коэффициент масштаба блоков из диалога настроек
                 int blockRatioScale = Configuration.AppConfig.Instance.BlockRatioScale;
                 if (blockRatioScale < 1 || blockRatioScale > 1000)
                 {
@@ -187,11 +196,6 @@ namespace LayoutsFromModel
                                                              name,
                                                              scale);
 
-                // Старый способ получения размеров блока: bref.GeometricExtents.MinPoint и bref.GeometricExtents.MaxPoint
-                // border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
-                //                                              bref.GeometricExtents.MaxPoint,
-                //                                              name,
-                //                                              scale);
                 tr.Commit();
             }
             return border;
@@ -233,16 +237,12 @@ namespace LayoutsFromModel
         /// <returns></returns>
         public bool IsBlockHasAttribute(Transaction tr, string tagName, BlockReference blockRef)
         {
-            // цикл по всем атрибутам блока
             foreach (ObjectId id in blockRef.AttributeCollection)
             {
-                // указатель на атрибут объекта по id
                 var attRef = (AttributeReference)tr.GetObject(id, OpenMode.ForRead);
 
-                // сравниваем текущий атрибут с искомым tagName
                 if (attRef.Tag.Equals(tagName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    // проверяем не пустой ли тег (выбираем только заполненный тег)
                     if (!string.IsNullOrEmpty(attRef.TextString))
                         return true;
                 }
@@ -260,13 +260,10 @@ namespace LayoutsFromModel
         /// <returns></returns>
         public string GetBlockAttribute(Transaction tr, string tagName, BlockReference blockRef)
         {
-            // цикл по всем атрибутам блока
             foreach (ObjectId id in blockRef.AttributeCollection)
             {
-                // указатель на атрибут объекта по id
                 var attRef = (AttributeReference)tr.GetObject(id, OpenMode.ForRead);
 
-                // сравниваем текущий атрибут с искомым tagName
                 if (attRef.Tag.Equals(tagName, StringComparison.CurrentCultureIgnoreCase))
                     return attRef.TextString.Replace("\"", "");
             }

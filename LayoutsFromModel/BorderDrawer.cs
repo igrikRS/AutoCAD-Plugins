@@ -16,6 +16,9 @@ namespace LayoutsFromModel
 		List<Drawable> objects = new List<Drawable>();
 		Color graphicsColor = Color.FromColorIndex(ColorMethod.ByLayer, 20);
 		
+		/// <summary>
+		/// Рисует границу и имя чертежа.
+		/// </summary>
 		public void DrawBorder(DrawingBorders border)
 		{
 			// Обводим рамку прямоугольником
@@ -30,6 +33,9 @@ namespace LayoutsFromModel
 			tm.AddTransient(txt, TransientDrawingMode.DirectShortTerm, 256, new IntegerCollection());
 		}
 		
+		/// <summary>
+		/// Создаёт прямоугольник по двум точкам.
+		/// </summary>
 		private ADS.DBObject CreateRectangle(Point3d first, Point3d second)
 		{
 			ADS.Polyline pl = new ADS.Polyline(4);
@@ -46,6 +52,9 @@ namespace LayoutsFromModel
 			return pl;
 		}
 		
+		/// <summary>
+		/// Создаёт текст с именем листа.
+		/// </summary>
 		private ADS.DBObject CreateLayoutNameMText(Point3d center, string name, string format, double scaleFactor)
 		{
 			ADS.MText mt = new ADS.MText();
@@ -59,6 +68,9 @@ namespace LayoutsFromModel
 			return mt;
 		}
 		
+		/// <summary>
+		/// Очищает созданные графические объекты.
+		/// </summary>
 		public void ClearData()
 		{
 			TransientManager tm = TransientManager.CurrentTransientManager;

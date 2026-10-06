@@ -23,6 +23,9 @@ namespace LayoutsFromModel
 
         public PromptResultStatus InitialDataStatus { get; private set; }
 
+        /// <summary>
+        /// Создаёт обработчик начального взаимодействия с пользователем.
+        /// </summary>
         public InitialUserInteraction()
         {
             this.index = 1;
@@ -41,6 +44,7 @@ namespace LayoutsFromModel
         /// <summary>
         /// Подготавливает исходные данные и при необходимости запрашивает номер первого листа.
         /// </summary>
+        /// <param name="requestInitialBorderIndex">Нужно ли запрашивать номер первого листа.</param>
         public void GetInitialData(bool requestInitialBorderIndex)
         {
             if (!requestInitialBorderIndex)
@@ -102,7 +106,7 @@ namespace LayoutsFromModel
             if (this.useTemplate)
             {
                 psinfos = PlotSettingsInfoBuilder.CreatePlotSettingsInfos(cfg.TemplatePath);
-                ed.WriteMessage("\n" + CP.UsingTemplate + cfg.TemplatePath);
+                ed.WriteMessage("\n" + CP.UsingTemplate + cfg.TemplatePath + "\n");
             }
             else
                 psinfos = PlotSettingsInfoBuilder.CreatePlotSettingsInfos();

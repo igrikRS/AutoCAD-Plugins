@@ -71,8 +71,14 @@ namespace LayoutsFromModel
         /// </summary>
         public PlotSettingsInfo PSInfo { get; set; }
 
+        /// <summary>
+        /// Создаёт пустое описание границ чертежа.
+        /// </summary>
         private DrawingBorders() { }
 
+        /// <summary>
+        /// Создаёт описание границ чертежа.
+        /// </summary>
         private DrawingBorders(Point3d first, Point3d second, string name, double scale)
         {
             this.first = first;
@@ -81,6 +87,9 @@ namespace LayoutsFromModel
             this.ScaleFactor = scale;
         }
 
+        /// <summary>
+        /// Создаёт и инициализирует границы чертежа.
+        /// </summary>
         public static DrawingBorders CreateDrawingBorders(Point3d first, Point3d second, string name, double scale)
         {
             DrawingBorders borders = new DrawingBorders(first, second, name, scale);
@@ -89,11 +98,17 @@ namespace LayoutsFromModel
             return borders;
         }
 
+        /// <summary>
+        /// Возвращает текстовое описание границ.
+        /// </summary>
         public override string ToString()
         {
             return string.Format("[LayoutBorders First={0}, Second={1}, Name={2}, Scale={3}]", first, second, name, ScaleFactor);
         }
 
+        /// <summary>
+        /// Передаёт границы указанному посетителю.
+        /// </summary>
         public void Accept(IBorderVisitor visitor)
         {
             visitor.DrawBorder(this);

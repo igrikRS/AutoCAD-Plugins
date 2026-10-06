@@ -10,6 +10,9 @@ namespace LayoutsFromModel.Configuration
     {
         int minValue = 0;
         
+        /// <summary>
+        /// Проверяет корректность значения точности.
+        /// </summary>
         public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
         {
             int precision;

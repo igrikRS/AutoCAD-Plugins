@@ -19,6 +19,9 @@ namespace LayoutsFromModel
             get { return current; }
         }
 
+        /// <summary>
+        /// Создаёт пустой менеджер настроек печати.
+        /// </summary>
         private PlotSettingsManager()
         { }
 
@@ -82,6 +85,9 @@ namespace LayoutsFromModel
             }
         }
 
+        /// <summary>
+        /// Добавляет уникальную настройку печати.
+        /// </summary>
         public void Add(PlotSettingsInfo item)
         {
             if (!plotSettingsInfos.Contains(item))
@@ -94,31 +100,49 @@ namespace LayoutsFromModel
             }
         }
 
+        /// <summary>
+        /// Очищает коллекцию настроек печати.
+        /// </summary>
         public void Clear()
         {
             plotSettingsInfos.Clear();
         }
 
+        /// <summary>
+        /// Проверяет наличие настройки печати.
+        /// </summary>
         public bool Contains(PlotSettingsInfo item)
         {
             return plotSettingsInfos.Contains(item);
         }
 
+        /// <summary>
+        /// Копирует настройки печати в массив.
+        /// </summary>
         public void CopyTo(PlotSettingsInfo[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Удаляет настройку печати из коллекции.
+        /// </summary>
         public bool Remove(PlotSettingsInfo item)
         {
             return plotSettingsInfos.Remove(item);
         }
 
+        /// <summary>
+        /// Возвращает перечислитель настроек печати.
+        /// </summary>
         public IEnumerator<PlotSettingsInfo> GetEnumerator()
         {
             return plotSettingsInfos.GetEnumerator();
         }
 
+        /// <summary>
+        /// Возвращает нетипизированный перечислитель настроек печати.
+        /// </summary>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return plotSettingsInfos.GetEnumerator();

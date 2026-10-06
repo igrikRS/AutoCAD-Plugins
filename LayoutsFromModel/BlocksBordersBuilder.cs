@@ -131,6 +131,9 @@ namespace LayoutsFromModel
 
     public static class BlockTableRecordExtensions
     {
+        /// <summary>
+        /// Возвращает идентификаторы вхождений блока.
+        /// </summary>
         public static IEnumerable<ObjectId> GetAllBlockReferenceIds(this BlockTableRecord btr, bool directOnly)
         {
             IEnumerable<ObjectId> brefIds = btr

@@ -101,12 +101,18 @@ namespace LayoutsFromModel
             return borders.ToArray();
         }
 
+        /// <summary>
+        /// Возвращает идентификатор пространства модели.
+        /// </summary>
         private ObjectId GetModelSpaceId(Transaction tr)
         {
             var blockTable = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
             return blockTable[BlockTableRecord.ModelSpace];
         }
 
+        /// <summary>
+        /// Возвращает подходящие форматки СПДС.
+        /// </summary>
         private IEnumerable<ObjectId> GetFormatIds(Transaction tr, ObjectId modelSpaceId)
         {
             PromptSelectionResult selection = _editor.SelectImplied();
@@ -129,6 +135,9 @@ namespace LayoutsFromModel
                 .ToArray();
         }
 
+        /// <summary>
+        /// Проверяет расположение объекта и печатаемость его слоя.
+        /// </summary>
         private bool IsUsableModelSpaceEntity(Transaction tr, ObjectId objectId, ObjectId modelSpaceId)
         {
             var entity = tr.GetObject(objectId, OpenMode.ForRead, false) as Entity;
@@ -141,6 +150,9 @@ namespace LayoutsFromModel
             return layer == null || layer.IsPlottable;
         }
 
+        /// <summary>
+        /// Читает номер листа, границы и масштаб форматки СПДС.
+        /// </summary>
         private bool TryReadFormat(Transaction tr, ObjectId formatId, out SpdsFormatInfo format)
         {
             format = null;
@@ -252,6 +264,9 @@ namespace LayoutsFromModel
             }
         }
 
+        /// <summary>
+        /// Нормализует номер листа форматки СПДС.
+        /// </summary>
         private static string NormalizeSheetNumber(string sheetNumber)
         {
             return string.IsNullOrWhiteSpace(sheetNumber)
@@ -259,11 +274,17 @@ namespace LayoutsFromModel
                 : sheetNumber.Replace("\"", string.Empty).Trim();
         }
 
+        /// <summary>
+        /// Проверяет корректность масштаба форматки.
+        /// </summary>
         private static bool IsValidScale(double scale)
         {
             return !double.IsNaN(scale) && !double.IsInfinity(scale) && scale > 0.0;
         }
 
+        /// <summary>
+        /// Выводит ошибку загрузки MultiCAD в командную строку.
+        /// </summary>
         private void WriteMultiCadLoadError(string details)
         {
             _editor.WriteMessage(
@@ -274,6 +295,9 @@ namespace LayoutsFromModel
 
         private sealed class SpdsFormatInfo
         {
+            /// <summary>
+            /// Создаёт данные форматки СПДС.
+            /// </summary>
             public SpdsFormatInfo(string sheetNumber, Extents3d extents, double scale)
             {
                 SheetNumber = sheetNumber;

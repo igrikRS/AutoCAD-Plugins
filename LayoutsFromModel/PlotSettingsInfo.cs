@@ -35,6 +35,9 @@ namespace LayoutsFromModel
         /// </summary>
         public PlotSettings PSettings { get; private set; }
 
+        /// <summary>
+        /// Создаёт описание настройки печати.
+        /// </summary>
         public PlotSettingsInfo(PlotSettings pSettings)
         {
             if (pSettings == null)
@@ -42,16 +45,25 @@ namespace LayoutsFromModel
             this.PSettings = pSettings;
         }
 
+        /// <summary>
+        /// Сравнивает настройки печати по размеру листа.
+        /// </summary>
         public bool Equals(PlotSettingsInfo x, PlotSettingsInfo y)
         {
             return Math.Abs(x.Height - y.Height) < 1E-9 && Math.Abs(x.Width - y.Width) < 1E-9;
         }
 
+        /// <summary>
+        /// Возвращает хеш-код размера листа.
+        /// </summary>
         public int GetHashCode(PlotSettingsInfo obj)
         {
             return (obj.Height * obj.Width).GetHashCode();
         }
 
+        /// <summary>
+        /// Возвращает имя настройки печати.
+        /// </summary>
         public override string ToString()
         {
             return Name;

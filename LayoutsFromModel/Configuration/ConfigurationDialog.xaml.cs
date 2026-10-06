@@ -29,11 +29,17 @@ namespace LayoutsFromModel.Configuration
         public int? BlockRatioScale { get; set; }
         public bool LockViewPorts { get; set; }
         
+        /// <summary>
+        /// Создаёт окно настроек.
+        /// </summary>
         public ConfigurationDialog()
         {
             InitializeComponent();
         }
         
+        /// <summary>
+        /// Создаёт окно с текущими значениями настроек.
+        /// </summary>
         public ConfigurationDialog
             (string prefix, string suffix, Nullable<int> precision,
             bool delNonInitializedLayouts, double referenceDimension, bool tilemodeOn, 
@@ -52,6 +58,9 @@ namespace LayoutsFromModel.Configuration
             this.LockViewPorts = lockViewPorts;
         }
         
+        /// <summary>
+        /// Заполняет элементы окна текущими настройками.
+        /// </summary>
         void Window_Loaded(object sender, RoutedEventArgs e)
         {
             txtPrefix.Text = this.Prefix;
@@ -65,11 +74,17 @@ namespace LayoutsFromModel.Configuration
             chkLockVP.IsChecked = this.LockViewPorts;
         }
         
+        /// <summary>
+        /// Подтверждает изменения настроек.
+        /// </summary>
         void OnButtonOkClick(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
         }
         
+        /// <summary>
+        /// Считывает значения элементов перед закрытием окна.
+        /// </summary>
         void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Prefix = txtPrefix.Text;

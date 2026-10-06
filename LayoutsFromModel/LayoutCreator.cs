@@ -17,6 +17,9 @@ namespace LayoutsFromModel
         Editor ed;
         int counter;
 
+        /// <summary>
+        /// Создаёт обработчик листов текущего чертежа.
+        /// </summary>
         public LayoutCreator()
         {
             this.wdb = HostApplicationServices.WorkingDatabase;

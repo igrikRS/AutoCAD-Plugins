@@ -40,6 +40,9 @@ namespace LayoutsFromModel
             set { queryStatus = value; }
         }
 
+        /// <summary>
+        /// Создаёт результат выбора двух точек рамки.
+        /// </summary>
         public BorderPromptResult(Point3d firstPoint, Point3d secondPoint, double scale = 100)
         {
             this.queryStatus = PromptResultStatus.OK;
@@ -49,6 +52,9 @@ namespace LayoutsFromModel
             this.scale = scale;
         }
 
+        /// <summary>
+        /// Создаёт результат выбора по строковому значению.
+        /// </summary>
         public BorderPromptResult(string stringResult)
         {
             this.queryStatus = PromptResultStatus.Keyword;
@@ -58,6 +64,9 @@ namespace LayoutsFromModel
             this.scale = 100;
         }
 
+        /// <summary>
+        /// Создаёт результат с указанным состоянием запроса.
+        /// </summary>
         public BorderPromptResult(PromptResultStatus queryStatus, double scale = 100)
         {
             this.queryStatus = queryStatus;

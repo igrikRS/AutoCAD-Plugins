@@ -18,17 +18,26 @@ namespace LayoutsFromModel
 		Editor ed;
 		public int InitialBorderIndex { get; set; }
 		
+		/// <summary>
+		/// Создаёт построитель с начальным номером листа 1.
+		/// </summary>
 		public UserInputBordersBuilder()
 		{
 			ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
 		}
 		
+		/// <summary>
+		/// Создаёт построитель с указанным начальным номером листа.
+		/// </summary>
 		public UserInputBordersBuilder(int firstPageIndex)
 			: this()
 		{
 			this.InitialBorderIndex = firstPageIndex;
 		}
 		
+		/// <summary>
+		/// Получает границы рамок, указанные пользователем.
+		/// </summary>
 		public DrawingBorders[] GetDrawingBorders()
 		{
 			List<DrawingBorders> borders = new List<DrawingBorders>();
@@ -134,6 +143,9 @@ namespace LayoutsFromModel
 			return borders.ToArray();
 		}
 		
+		/// <summary>
+		/// Определяет масштаб рамки по эталонному размеру.
+		/// </summary>
 		double GetScale(double baseReferenceDimension)
 		{
 			string prompt = string.Format("\nЗадайте или укажите длину основной надписи (то, что должно быть {0} мм):", baseReferenceDimension);
@@ -152,6 +164,9 @@ namespace LayoutsFromModel
 			return scale;
 		}
 		
+		/// <summary>
+		/// Запрашивает у пользователя две точки рамки.
+		/// </summary>
 		BorderPromptResult GetBorderPoints()
 		{
 			PromptPointOptions ppo = new PromptPointOptions("\n" + CP.FrameFirstPointQuery);

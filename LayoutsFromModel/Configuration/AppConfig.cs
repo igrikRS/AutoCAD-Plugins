@@ -157,6 +157,9 @@ namespace LayoutsFromModel.Configuration
             get { return instance; }
         }
 
+        /// <summary>
+        /// Создаёт конфигурацию со значениями по умолчанию.
+        /// </summary>
         private AppConfig()
         { }
 
@@ -225,11 +228,17 @@ namespace LayoutsFromModel.Configuration
             }
         }
 
+        /// <summary>
+        /// Проверяет наличие выбранного шаблона.
+        /// </summary>
         public bool TemplateExists()
         {
             return !string.IsNullOrEmpty(this.TemplatePath) && File.Exists(this.TemplatePath);
         }
 
+        /// <summary>
+        /// Проверяет наличие выбранного или стандартного шаблона.
+        /// </summary>
         public bool IsDefaulTemplateExists()
         {
             if (!TemplateExists())
@@ -243,6 +252,9 @@ namespace LayoutsFromModel.Configuration
             return true;
         }
 
+        /// <summary>
+        /// Возвращает текстовое описание конфигурации.
+        /// </summary>
         public override string ToString()
         {
             return string.Format(
