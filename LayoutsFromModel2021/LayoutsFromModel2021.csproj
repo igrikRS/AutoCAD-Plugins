@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <SpdsGraphicsVersion>2021</SpdsGraphicsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -180,5 +181,6 @@
       <CustomToolNamespace>LayoutsFromModel.Resources</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
+  <Import Project="..\SpdsGraphicsReferences.props" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

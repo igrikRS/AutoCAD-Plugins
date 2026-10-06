@@ -1,193 +1,289 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Multicad;
 
-//using Multicad;
+using McDbEntity = Multicad.DatabaseServices.McDbEntity;
 
-/*
 namespace LayoutsFromModel
 {
     /// <summary>
-    /// Класс, создающий коллекцию границ чертежей из вхождений СПДС-рамок
+    /// Создаёт коллекцию границ чертежей из форматок СПДС GraphiCS.
     /// </summary>
-    /// команда "igrikCreateLayoutsSpds"
-
+    /// <remarks>Команда: igrikCreateLayoutsSpds.</remarks>
     public class UserSpdsFormatBordersBuilder : IBordersCollectionBuilder
     {
-        private Database _wdb = HostApplicationServices.WorkingDatabase;
+        private const string SpdsFormatObjectClassName = "mcsDbObjectFormat";
+        private const string SpdsFormatPropertySheetName = "Sheet";
+
+        private readonly Database _wdb = HostApplicationServices.WorkingDatabase;
+        private readonly Editor _editor = Autodesk.AutoCAD.ApplicationServices.Application
+            .DocumentManager.MdiActiveDocument.Editor;
 
         public int InitialBorderIndex { get; set; }
 
-        public string SpdsFormatObjectClassName = "mcsDbObjectFormat";
-        public string SpdsFormatPropertySheetName = "Sheet";
-
         /// <summary>
-        /// Получение границ из вхождений блоков
+        /// Получает форматки из предварительного выбора или из пространства модели.
         /// </summary>
-        /// <returns>Массив границ чертежей</returns>
         public DrawingBorders[] GetDrawingBorders()
         {
-            List<DrawingBorders> borders = new List<DrawingBorders>();
+            var borders = new List<DrawingBorders>();
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
-                // Получаем коллекцию ObjectId вхождений блока blockname, затем сортируем
-                IEnumerable<ObjectId> blockRefIds = null;
+                ObjectId modelSpaceId = GetModelSpaceId(tr);
+                IEnumerable<ObjectId> formatIds = GetFormatIds(tr, modelSpaceId);
+                var formats = new List<SpdsFormatInfo>();
 
-                Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-                PromptSelectionResult res = ed.SelectImplied();
-
-                // если пользователем выбраны объекты до ввода команды
-                // ищем экземпляры блока только из пользоват.выборки
-                if (res.Status == PromptStatus.OK)
+                try
                 {
-                    LayerTable lt = tr.GetObject(_wdb.LayerTableId, OpenMode.ForRead) as LayerTable;
-
-                    blockRefIds = res.Value
-                        .GetObjectIds()
-                        .Where(id => id.ObjectClass.Name == SpdsFormatObjectClassName)
-                        .Where(id => IsBlockHasAttribute(tr, tagname, (BlockReference)tr.GetObject(id, OpenMode.ForRead)));
-                        // .Where(id => ((LayerTableRecord)tr.GetObject(lt[id.Layer], OpenMode.ForRead)).IsPlottable );
+                    foreach (ObjectId formatId in formatIds)
+                    {
+                        SpdsFormatInfo format;
+                        if (TryReadFormat(tr, formatId, out format))
+                        {
+                            formats.Add(format);
+                        }
+                    }
                 }
-                else
+                catch (FileNotFoundException ex)
                 {
-                    // сбор всех существующих "экземпляров" блока по его "типу класса" в модели
-                    blockRefIds = GetBlockAllReferences(btrId);
+                    WriteMultiCadLoadError(ex.Message);
+                    return borders.ToArray();
+                }
+                catch (TypeLoadException ex)
+                {
+                    WriteMultiCadLoadError(ex.Message);
+                    return borders.ToArray();
+                }
+                catch (BadImageFormatException ex)
+                {
+                    WriteMultiCadLoadError(ex.Message);
+                    return borders.ToArray();
                 }
 
-                // выборка блоков и сортировка
-                blockRefIds = blockRefIds
-                    .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
-                    .OrderBy(n => AlphanumericCompare(GetBlockAttribute(tr, SpdsFormatPropertySheetName, n)))
-                    .Select(n => n.ObjectId);
+                Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
 
-                int borderIndex = InitialBorderIndex;
-
-                foreach (var brefId in blockRefIds)
+                foreach (SpdsFormatInfo format in formats
+                    .OrderBy(item => CompareHelper.AlphanumericCompare(item.SheetNumber)))
                 {
-                    // получаем название листа из его тега ЛИСТ
-                    // добавляем префикс и суффикс
-                    string borderName = string.Format("{0}{1}{2}",
-                                  Configuration.AppConfig.Instance.Prefix,
-                                  GetBlockAttribute(tr, SpdsFormatPropertySheetName, (BlockReference)tr.GetObject(brefId, OpenMode.ForRead)),
-                                  Configuration.AppConfig.Instance.Suffix);
+                    string borderName = string.Format(
+                        "{0}{1}{2}",
+                        cfg.Prefix,
+                        format.SheetNumber,
+                        cfg.Suffix);
 
+                    DrawingBorders border = DrawingBorders.CreateDrawingBorders(
+                        format.Extents.MinPoint,
+                        format.Extents.MaxPoint,
+                        borderName,
+                        format.Scale);
 
-                    // создаём рамку будущего листа
-                    borders.Add(CreateBorder(brefId, borderName));
+                    borders.Add(border);
+                    _editor.WriteMessage(
+                        "\nДобавляем лист {0}. Формат листа: {1}. Масштаб: {2}",
+                        borderName,
+                        border.PSInfo.Name,
+                        format.Scale);
                 }
 
                 tr.Commit();
+            }
+
+            if (borders.Count == 0)
+            {
+                _editor.WriteMessage("\nФорматки СПДС с заполненным свойством Sheet не найдены.\n");
             }
 
             return borders.ToArray();
         }
 
-
-        private List<ObjectId> GetBlockAllReferences(ObjectId blockId)
+        private ObjectId GetModelSpaceId(Transaction tr)
         {
-            // создаём список (пустой)
-            List<ObjectId> result = null;
-            // открываем транзакцию
-            using (Transaction tr = _wdb.TransactionManager.StartTransaction())
+            var blockTable = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
+            return blockTable[BlockTableRecord.ModelSpace];
+        }
+
+        private IEnumerable<ObjectId> GetFormatIds(Transaction tr, ObjectId modelSpaceId)
+        {
+            PromptSelectionResult selection = _editor.SelectImplied();
+            IEnumerable<ObjectId> objectIds;
+
+            if (selection.Status == PromptStatus.OK)
             {
-                // получаем указатель на таблицу копий блоков в конкретном месте (будем получать из модели)
-                BlockTableRecord btr = (BlockTableRecord)tr.GetObject(blockId, OpenMode.ForRead);
-                // указатель на общую таблицу блоков в чертеже (в базе данных чертежа)
-                BlockTable bt = (BlockTable)tr.GetObject(_wdb.BlockTableId, OpenMode.ForRead);
-                ObjectId modelId = ((BlockTableRecord)tr
-                                    .GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForRead)).ObjectId;
-
-                LayerTable lt = tr.GetObject(_wdb.LayerTableId, OpenMode.ForRead) as LayerTable;
-
-                // собираем коллекцию блоков:
-                // 1) получаем все вхождения
-                // 2) сравниваем место расположения (n.OwnerId == modelId)
-                // 3) получаем id объекта
-                // 4) заносим в список тех, кто выполняет наши условия
-                result = btr.GetAllBlockReferenceIds(true)
-                    .Select(n => (BlockReference)tr.GetObject(n, OpenMode.ForRead))
-                    // * итератор * * если в модели *    * блок динамический *                   * не лежит на непечатаемом слое *
-                    .Where(n => (n.OwnerId == modelId && ((LayerTableRecord)tr.GetObject(lt[n.Layer], OpenMode.ForRead)).IsPlottable) )
-                    .Select(n => n.ObjectId)
-                    .ToList();
-                tr.Commit();
+                objectIds = selection.Value.GetObjectIds();
             }
-            return result;
+            else
+            {
+                var modelSpace = (BlockTableRecord)tr.GetObject(modelSpaceId, OpenMode.ForRead);
+                objectIds = modelSpace.Cast<ObjectId>();
+            }
+
+            return objectIds
+                .Where(id => !id.IsNull && id.IsValid && !id.IsErased)
+                .Where(id => id.ObjectClass.Name == SpdsFormatObjectClassName)
+                .Where(id => IsUsableModelSpaceEntity(tr, id, modelSpaceId))
+                .ToArray();
+        }
+
+        private bool IsUsableModelSpaceEntity(Transaction tr, ObjectId objectId, ObjectId modelSpaceId)
+        {
+            var entity = tr.GetObject(objectId, OpenMode.ForRead, false) as Entity;
+            if (entity == null || entity.OwnerId != modelSpaceId)
+            {
+                return false;
+            }
+
+            var layer = tr.GetObject(entity.LayerId, OpenMode.ForRead) as LayerTableRecord;
+            return layer == null || layer.IsPlottable;
+        }
+
+        private bool TryReadFormat(Transaction tr, ObjectId formatId, out SpdsFormatInfo format)
+        {
+            format = null;
+
+            var entity = tr.GetObject(formatId, OpenMode.ForRead, false) as Entity;
+            if (entity == null)
+            {
+                return false;
+            }
+
+            string sheetNumber;
+            double multiCadScale;
+
+            try
+            {
+                ReadMultiCadProperties(formatId, out sheetNumber, out multiCadScale);
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+            catch (TypeLoadException)
+            {
+                throw;
+            }
+            catch (BadImageFormatException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _editor.WriteMessage(
+                    "\nНе удалось прочитать свойства форматки СПДС {0}: {1}",
+                    formatId.Handle,
+                    ex.Message);
+                return false;
+            }
+
+            sheetNumber = NormalizeSheetNumber(sheetNumber);
+            if (string.IsNullOrEmpty(sheetNumber))
+            {
+                _editor.WriteMessage(
+                    "\nПропущена форматка СПДС {0}: свойство Sheet не заполнено.",
+                    formatId.Handle);
+                return false;
+            }
+
+            Extents3d extents;
+            try
+            {
+                extents = entity.GeometricExtents;
+            }
+            catch (Exception ex)
+            {
+                _editor.WriteMessage(
+                    "\nПропущена форматка СПДС {0}: не удалось получить границы ({1}).",
+                    formatId.Handle,
+                    ex.Message);
+                return false;
+            }
+
+            double scale = IsValidScale(multiCadScale)
+                ? multiCadScale
+                : entity.LinetypeScale;
+
+            if (!IsValidScale(scale))
+            {
+                _editor.WriteMessage(
+                    "\nУ форматки СПДС {0} некорректный масштаб. Используется масштаб 1.",
+                    formatId.Handle);
+                scale = 1.0;
+            }
+
+            format = new SpdsFormatInfo(sheetNumber, extents, scale);
+            return true;
         }
 
         /// <summary>
-        /// Создание объекта границы блока-рамки
-        /// Масштаб берётся из масштаба вхождения блока по оси X
+        /// Метод вынесен отдельно, чтобы ошибка загрузки MultiCAD могла быть обработана вызывающим кодом.
         /// </summary>
-        /// <param name="brefId">ObjectId вхождения блока рамки</param>
-        /// <param name="name">Имя будущего листа</param>
-        /// <returns>Объект границ чертежа</returns>
-        private DrawingBorders CreateBorder(ObjectId brefId, string name)
+        private static void ReadMultiCadProperties(
+            ObjectId formatId,
+            out string sheetNumber,
+            out double scale)
         {
-            DrawingBorders border = null;
+            sheetNumber = string.Empty;
+            scale = double.NaN;
 
-            using (Transaction tr = _wdb.TransactionManager.StartTransaction())
+            McObjectId mcObjectId = McObjectId.FromOldIdPtr(formatId.OldIdPtr);
+            McObject mcObject = mcObjectId.GetObject();
+            if (mcObject == null)
             {
-                // получаем коэффициент масштаба блоков из диалога настроек
-                int blockRatioScale = Configuration.AppConfig.Instance.BlockRatioScale;
-                if (blockRatioScale < 1 || blockRatioScale > 1000)
-                {
-                    blockRatioScale = 1;
-                    Configuration.AppConfig.Instance.BlockRatioScale = blockRatioScale;
-                }
-
-                BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
-                double scale = bref.ScaleFactors.X * blockRatioScale;
-                border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
-                                                             bref.GeometricExtents.MaxPoint,
-                                                             name,
-                                                             scale);
-                tr.Commit();
-            }
-            return border;
-        }
-
-        /// <summary>
-        /// Получение текста заданного атрибута в указанном экземпляре блока
-        /// </summary>
-        /// <param name="tr">Транзакция</param>
-        /// <param name="tagName">Имя искомого атрибута</param>
-        /// <param name="blockRef">Указатель на блок-рамку</param>
-        /// <returns></returns>
-        public string GetBlockAttribute(Transaction tr, string tagName, BlockReference blockRef)
-        {
-            // цикл по всем атрибутам блока
-            foreach (ObjectId id in blockRef.AttributeCollection)
-            {
-                // указатель на атрибут объекта по id
-                var attRef = (AttributeReference)tr.GetObject(id, OpenMode.ForRead);
-
-                // сравниваем текущий атрибут с искомым tagName
-                if (attRef.Tag.Equals(tagName, StringComparison.CurrentCultureIgnoreCase))
-                    return attRef.TextString.Replace("\"", "");
+                return;
             }
 
-            //McObjectId mcsId = Multicad.McObjectId.FromOldIdPtr(brefId.OldIdPtr);
-            //McPropertySource mcPropertySource = mcsId.GetObject()?.Cast<McPropertySource>();
-            //McProperties _mcProperties = mcPropertySource.ObjectProperties;
-            //string sDrawingName = (string)_mcProperties.GetValueEx("Sheet", "");
+            McPropertySource propertySource = mcObject.Cast<McPropertySource>();
+            if (propertySource != null)
+            {
+                object sheetValue = propertySource.ObjectProperties.GetValueEx(
+                    SpdsFormatPropertySheetName,
+                    string.Empty);
+                sheetNumber = Convert.ToString(sheetValue);
+            }
 
-            return "";
+            McDbEntity dbEntity = mcObject.Cast<McDbEntity>();
+            if (dbEntity != null)
+            {
+                scale = dbEntity.Scale;
+            }
         }
 
-        /// <summary>
-        /// Сортировка строковых номеров листов
-        /// © https://stackoverflow.com/questions/5093842/alphanumeric-sorting-using-linq
-        /// </summary>
-        /// <param name="input">Коллекция листов в строковом виде</param>
-        /// <returns></returns>
-        public static string AlphanumericCompare(string input)
+        private static string NormalizeSheetNumber(string sheetNumber)
         {
-            return System.Text.RegularExpressions.Regex.Replace(input, "[0-9.]+", match => match.Value.PadLeft(10, '0'));
+            return string.IsNullOrWhiteSpace(sheetNumber)
+                ? string.Empty
+                : sheetNumber.Replace("\"", string.Empty).Trim();
+        }
+
+        private static bool IsValidScale(double scale)
+        {
+            return !double.IsNaN(scale) && !double.IsInfinity(scale) && scale > 0.0;
+        }
+
+        private void WriteMultiCadLoadError(string details)
+        {
+            _editor.WriteMessage(
+                "\nНе удалось загрузить библиотеки MultiCAD. " +
+                "Установите совместимую версию СПДС GraphiCS или Object Enabler.\n{0}\n",
+                details);
+        }
+
+        private sealed class SpdsFormatInfo
+        {
+            public SpdsFormatInfo(string sheetNumber, Extents3d extents, double scale)
+            {
+                SheetNumber = sheetNumber;
+                Extents = extents;
+                Scale = scale;
+            }
+
+            public string SheetNumber { get; private set; }
+            public Extents3d Extents { get; private set; }
+            public double Scale { get; private set; }
         }
     }
 }
-*/
