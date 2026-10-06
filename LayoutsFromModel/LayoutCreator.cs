@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -221,6 +222,57 @@ namespace LayoutsFromModel
                 }
                 tr.Commit();
             }
+        }
+
+        /// <summary>
+        /// Удаляет все листы, кроме первого по порядку вкладок.
+        /// Оставшийся лист переименовывает в "Y".
+        /// </summary>
+        public void DeleteExistingLayouts()
+        {
+            var layouts = new List<KeyValuePair<int, string>>();
+
+            using (Transaction tr = wdb.TransactionManager.StartTransaction())
+            {
+                DBDictionary dictionary =
+                    (DBDictionary)tr.GetObject(wdb.LayoutDictionaryId, OpenMode.ForRead);
+                foreach (DBDictionaryEntry entry in dictionary)
+                {
+                    Layout layout = (Layout)tr.GetObject(entry.Value, OpenMode.ForRead);
+                    if (!layout.ModelType)
+                    {
+                        layouts.Add(new KeyValuePair<int, string>(
+                            layout.TabOrder,
+                            layout.LayoutName));
+                    }
+                }
+
+                tr.Commit();
+            }
+
+            if (layouts.Count == 0)
+                return;
+
+            layouts.Sort((left, right) => left.Key.CompareTo(right.Key));
+
+            LayoutManager layoutManager = LayoutManager.Current;
+            string retainedLayoutName = layouts[0].Value;
+            layoutManager.CurrentLayout = retainedLayoutName;
+
+            for (int i = 1; i < layouts.Count; i++)
+            {
+                layoutManager.DeleteLayout(layouts[i].Value);
+            }
+
+            if (!string.Equals(retainedLayoutName, "Y", StringComparison.OrdinalIgnoreCase))
+            {
+                layoutManager.RenameLayout(retainedLayoutName, "Y");
+            }
+
+            Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("TILEMODE", 1);
+
+            ed.WriteMessage(
+                "\nСуществующие листы удалены. Оставшийся лист переименован в \"Y\".\n");
         }
 
     }

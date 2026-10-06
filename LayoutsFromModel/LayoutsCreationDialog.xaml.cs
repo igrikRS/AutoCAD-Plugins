@@ -9,6 +9,7 @@ namespace LayoutsFromModel
         AutomaticSpdsFormats,
         ManualBlocks,
         ManualFrame,
+        DeleteLayouts,
         Settings,
         Template
     }
@@ -44,6 +45,11 @@ namespace LayoutsFromModel
         private void OnManualFrameClick(object sender, RoutedEventArgs e)
         {
             Complete(LayoutsCreationAction.ManualFrame);
+        }
+
+        private void OnDeleteLayoutsClick(object sender, RoutedEventArgs e)
+        {
+            Complete(LayoutsCreationAction.DeleteLayouts);
         }
 
         private void OnSettingsClick(object sender, RoutedEventArgs e)

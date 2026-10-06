@@ -45,6 +45,16 @@ namespace LayoutsFromModel
                     case LayoutsCreationAction.ManualFrame:
                         bordersBuilder = new UserInputBordersBuilder();
                         break;
+                    case LayoutsCreationAction.DeleteLayouts:
+                        System.Windows.MessageBoxResult confirmation = System.Windows.MessageBox.Show(
+                            "Вы уверены, что хотите удалить все существующие листы?",
+                            "Удаление листов",
+                            System.Windows.MessageBoxButton.YesNo,
+                            System.Windows.MessageBoxImage.Warning,
+                            System.Windows.MessageBoxResult.No);
+                        if (confirmation == System.Windows.MessageBoxResult.Yes)
+                            new LayoutCreator().DeleteExistingLayouts();
+                        continue;
                     case LayoutsCreationAction.Settings:
                         Configuration.AppConfig.Instance.ShowDialog();
                         continue;
