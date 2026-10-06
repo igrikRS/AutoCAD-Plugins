@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 
 namespace LayoutsFromModel
@@ -27,7 +28,17 @@ namespace LayoutsFromModel
         public LayoutsCreationDialog()
         {
             InitializeComponent();
+            Title = $"{Title} ({GetAssemblyBuildDate():dd.MM.yyyy})";
             SelectedAction = LayoutsCreationAction.None;
+        }
+
+        /// <summary>
+        /// Возвращает дату сборки загруженной DLL.
+        /// </summary>
+        private static System.DateTime GetAssemblyBuildDate()
+        {
+            string assemblyPath = typeof(LayoutsCreationDialog).Assembly.Location;
+            return File.GetLastWriteTime(assemblyPath);
         }
 
         /// <summary>
