@@ -54,6 +54,9 @@ LayersLibrary.cs
 View.cs
 Git help.txt
 
+# Links
+*.lnk
+
 # AutoCAD files
 *.dwg
 *.dwl

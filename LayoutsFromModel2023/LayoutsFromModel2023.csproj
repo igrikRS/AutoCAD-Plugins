@@ -78,6 +78,10 @@
       <Link>Configuration\ConfigurationDialog.xaml.cs</Link>
       <DependentUpon>ConfigurationDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="..\LayoutsFromModel\LayoutsCreationDialog.xaml.cs">
+      <Link>LayoutsCreationDialog.xaml.cs</Link>
+      <DependentUpon>LayoutsCreationDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="..\LayoutsFromModel\DrawingBorders.cs">
       <Link>DrawingBorders.cs</Link>
     </Compile>
@@ -160,6 +164,10 @@
   <ItemGroup>
   <Page Include="..\LayoutsFromModel\Configuration\ConfigurationDialog.xaml">
       <Link>Configuration\ConfigurationDialog.xaml</Link>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="..\LayoutsFromModel\LayoutsCreationDialog.xaml">
+      <Link>LayoutsCreationDialog.xaml</Link>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

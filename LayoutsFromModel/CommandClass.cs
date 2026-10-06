@@ -18,6 +18,48 @@ namespace LayoutsFromModel
     /// </summary>
     public class CommandClass
     {
+        [CommandMethod("igrikCreateLayouts", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
+        public void OpenLayoutsCreationDialog()
+        {
+            while (true)
+            {
+                LayoutsCreationDialog dialog = new LayoutsCreationDialog();
+                if (dialog.ShowDialog() != true)
+                    return;
+
+                IBordersCollectionBuilder bordersBuilder = null;
+                bool requestInitialBorderIndex = true;
+                switch (dialog.SelectedAction)
+                {
+                    case LayoutsCreationAction.AutomaticBlocks:
+                        bordersBuilder = new UserAutoBlocksBordersBuilder();
+                        requestInitialBorderIndex = false;
+                        break;
+                    case LayoutsCreationAction.AutomaticSpdsFormats:
+                        bordersBuilder = new UserSpdsFormatBordersBuilder();
+                        requestInitialBorderIndex = false;
+                        break;
+                    case LayoutsCreationAction.ManualBlocks:
+                        bordersBuilder = new UserInputBlocksBordersBuilder();
+                        break;
+                    case LayoutsCreationAction.ManualFrame:
+                        bordersBuilder = new UserInputBordersBuilder();
+                        break;
+                    case LayoutsCreationAction.Settings:
+                        Configuration.AppConfig.Instance.ShowDialog();
+                        continue;
+                    case LayoutsCreationAction.Template:
+                        new InitialUserInteraction().SelectTemplate();
+                        continue;
+                    default:
+                        return;
+                }
+
+                CreateLayouts(bordersBuilder, requestInitialBorderIndex);
+                return;
+            }
+        }
+
         [CommandMethod("igrikCreateLayoutsOptions", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void OpenInitialConfigDialog()
         {
@@ -55,10 +97,10 @@ namespace LayoutsFromModel
             CreateLayouts(new UserSpdsFormatBordersBuilder());
         }
 
-        private void CreateLayouts(IBordersCollectionBuilder bordersBuilder)
+        private void CreateLayouts(IBordersCollectionBuilder bordersBuilder, bool requestInitialBorderIndex = true)
         {
             InitialUserInteraction initial = new InitialUserInteraction();
-            initial.GetInitialData();
+            initial.GetInitialData(requestInitialBorderIndex);
             if (initial.InitialDataStatus == PromptResultStatus.Cancelled)
                 return;
             initial.FillPlotInfoManager();

@@ -35,6 +35,21 @@ namespace LayoutsFromModel
         /// </summary>
         public void GetInitialData()
         {
+            GetInitialData(true);
+        }
+
+        /// <summary>
+        /// Подготавливает исходные данные и при необходимости запрашивает номер первого листа.
+        /// </summary>
+        public void GetInitialData(bool requestInitialBorderIndex)
+        {
+            if (!requestInitialBorderIndex)
+            {
+                CheckDefaulTemplate();
+                this.InitialDataStatus = PromptResultStatus.OK;
+                return;
+            }
+
             PromptIntegerResult piRes = null; // Номер первого Layout
             bool exitLoop = false; // Условие продолжения команды
             do
@@ -140,7 +155,7 @@ namespace LayoutsFromModel
         /// Запрос пользователя для выбора файла шаблона
         /// </summary>
         /// <returns>True, если был выбран корректный файл шаблона, иначе false</returns>
-        private bool SelectTemplate()
+        public bool SelectTemplate()
         {
             Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
             PromptOpenFileOptions pofo = new PromptOpenFileOptions(CP.TemplateFileQuery);
