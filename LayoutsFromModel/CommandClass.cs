@@ -45,8 +45,11 @@ namespace LayoutsFromModel
                     case LayoutsCreationAction.ManualBlocks:
                         bordersBuilder = new UserInputBlocksBordersBuilder();
                         break;
-                    case LayoutsCreationAction.ManualFrame:
-                        bordersBuilder = new UserInputBordersBuilder();
+                    case LayoutsCreationAction.ManualFrameByLine:
+                        bordersBuilder = new ManualFrameByLineBordersBuilder();
+                        break;
+                    case LayoutsCreationAction.ManualFrameByFormat:
+                        bordersBuilder = new ManualFrameByFormatBordersBuilder();
                         break;
                     case LayoutsCreationAction.DeleteLayouts:
                         System.Windows.MessageBoxResult confirmation = System.Windows.MessageBox.Show(
@@ -89,7 +92,7 @@ namespace LayoutsFromModel
         [CommandMethod("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void LayoutFromUserInput()
         {
-            CreateLayouts(new UserInputBordersBuilder());
+            CreateLayouts(new ManualFrameByLineBordersBuilder());
         }
 
         /// <summary>

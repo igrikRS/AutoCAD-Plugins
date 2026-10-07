@@ -28,6 +28,7 @@ namespace LayoutsFromModel.Configuration
         public string TagName { get; set; }
         public int? BlockRatioScale { get; set; }
         public bool LockViewPorts { get; set; }
+        public bool ManualFrameWithPaperFormat { get; set; }
         
         /// <summary>
         /// Создаёт окно настроек.
@@ -43,7 +44,8 @@ namespace LayoutsFromModel.Configuration
         public ConfigurationDialog
             (string prefix, string suffix, Nullable<int> precision,
             bool delNonInitializedLayouts, double referenceDimension, bool tilemodeOn, 
-            string blockname, string tagname, int blockRatioScale, bool lockViewPorts)
+            string blockname, string tagname, int blockRatioScale, bool lockViewPorts,
+            bool manualFrameWithPaperFormat)
             :this()
         {
             this.Prefix = prefix;
@@ -56,6 +58,7 @@ namespace LayoutsFromModel.Configuration
             this.TagName = tagname;
             this.BlockRatioScale = blockRatioScale;
             this.LockViewPorts = lockViewPorts;
+            this.ManualFrameWithPaperFormat = manualFrameWithPaperFormat;
         }
         
         /// <summary>
@@ -72,6 +75,7 @@ namespace LayoutsFromModel.Configuration
             txtTagName.Text = this.TagName;
             txtBlockRatioScale.Text = this.BlockRatioScale.ToString();
             chkLockVP.IsChecked = this.LockViewPorts;
+            chkManualFrameWithPaperFormat.IsChecked = this.ManualFrameWithPaperFormat;
         }
         
         /// <summary>
@@ -96,6 +100,7 @@ namespace LayoutsFromModel.Configuration
             this.BlockName = txtBlockName.Text;
             this.TagName = txtTagName.Text;
             this.LockViewPorts = chkLockVP.IsChecked ?? false;
+            this.ManualFrameWithPaperFormat = chkManualFrameWithPaperFormat.IsChecked ?? false;
 
             int outBlockRatioScale;
             this.BlockRatioScale = int.TryParse(txtBlockRatioScale.Text, out outBlockRatioScale)

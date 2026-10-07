@@ -9,7 +9,8 @@ namespace LayoutsFromModel
         AutomaticBlocks,
         AutomaticSpdsFormats,
         ManualBlocks,
-        ManualFrame,
+        ManualFrameByLine,
+        ManualFrameByFormat,
         DeleteLayouts,
         Settings,
         Template
@@ -70,7 +71,10 @@ namespace LayoutsFromModel
         /// </summary>
         private void OnManualFrameClick(object sender, RoutedEventArgs e)
         {
-            Complete(LayoutsCreationAction.ManualFrame);
+            LayoutsCreationAction action = Configuration.AppConfig.Instance.ManualFrameWithPaperFormat
+                ? LayoutsCreationAction.ManualFrameByFormat
+                : LayoutsCreationAction.ManualFrameByLine;
+            Complete(action);
         }
 
         /// <summary>

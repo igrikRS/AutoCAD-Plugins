@@ -149,9 +149,16 @@
       <Link>UserInputBlocksBordersBuilder.cs</Link>
       <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
     </Compile>
-    <Compile Include="..\LayoutsFromModel\UserInputBordersBuilder.cs">
-      <Link>UserInputBordersBuilder.cs</Link>
+    <Compile Include="..\LayoutsFromModel\ManualFrameByLineBordersBuilder.cs">
+      <Link>ManualFrameByLineBordersBuilder.cs</Link>
       <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\ManualFrameByFormatBordersBuilder.cs">
+      <Link>ManualFrameByFormatBordersBuilder.cs</Link>
+      <DependentUpon>IBordersCollectionBuilder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\LayoutsFromModel\PaperFormatSelectionDialog.cs">
+      <Link>PaperFormatSelectionDialog.cs</Link>
     </Compile>
     <Compile Include="..\LayoutsFromModel\UserSpdsFormatBordersBuilder.cs">
       <Link>UserSpdsFormatBordersBuilder.cs</Link>

@@ -13,7 +13,7 @@ namespace LayoutsFromModel
 	/// Класс, создающий коллекцию границ чертежей с помощью
 	/// ввода этих самых границ пользователем
 	/// </summary>
-	public class UserInputBordersBuilder : IBordersCollectionBuilder
+	public class ManualFrameByLineBordersBuilder : IBordersCollectionBuilder
 	{
 		Editor ed;
 		public int InitialBorderIndex { get; set; }
@@ -21,7 +21,7 @@ namespace LayoutsFromModel
 		/// <summary>
 		/// Создаёт построитель с начальным номером листа 1.
 		/// </summary>
-		public UserInputBordersBuilder()
+		public ManualFrameByLineBordersBuilder()
 		{
 			ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
 		}
@@ -29,7 +29,7 @@ namespace LayoutsFromModel
 		/// <summary>
 		/// Создаёт построитель с указанным начальным номером листа.
 		/// </summary>
-		public UserInputBordersBuilder(int firstPageIndex)
+		public ManualFrameByLineBordersBuilder(int firstPageIndex)
 			: this()
 		{
 			this.InitialBorderIndex = firstPageIndex;

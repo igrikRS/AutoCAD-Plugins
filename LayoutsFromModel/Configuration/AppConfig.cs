@@ -127,6 +127,16 @@ namespace LayoutsFromModel.Configuration
             set { lockViewPorts = value; }
         }
 
+        bool manualFrameWithPaperFormat = false;
+        /// <summary>
+        /// Запрашивать ли формат листа при ручном выборе рамки.
+        /// </summary>
+        public bool ManualFrameWithPaperFormat
+        {
+            get { return manualFrameWithPaperFormat; }
+            set { manualFrameWithPaperFormat = value; }
+        }
+
         const string TEMPLATENAME = "lfmtemplate.dwt"; // Имя файла шаблона
         /// <summary>
         /// Получение имени файла шаблона
@@ -211,7 +221,8 @@ namespace LayoutsFromModel.Configuration
                                                               BlockName,
                                                               TagName,
                                                               BlockRatioScale,
-                                                              LockViewPorts);
+                                                              LockViewPorts,
+                                                              ManualFrameWithPaperFormat);
             win.ShowDialog();
             if (true == win.DialogResult)
             {
@@ -224,6 +235,7 @@ namespace LayoutsFromModel.Configuration
                 this.TagName = win.TagName;
                 this.BlockRatioScale = win.BlockRatioScale ?? new AppConfig().blockRatioScale;
                 this.LockViewPorts = win.LockViewPorts;
+                this.ManualFrameWithPaperFormat = win.ManualFrameWithPaperFormat;
                 Save();
             }
         }
