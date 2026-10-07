@@ -21,6 +21,7 @@ namespace LayoutsFromModel
         /// <summary>
         /// Открывает окно выбора способа создания листов.
         /// </summary>
+        [CommandMethod("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
         [CommandMethod("igrikCreateLayouts", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
         public void OpenLayoutsCreationDialog()
         {
@@ -89,7 +90,6 @@ namespace LayoutsFromModel
         /// Создаёт листы по рамкам, указанным вручную.
         /// </summary>
         [CommandMethod("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
-        [CommandMethod("bargLFM", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
         public void LayoutFromUserInput()
         {
             CreateLayouts(new ManualFrameByLineBordersBuilder());
