@@ -52,10 +52,18 @@
                         Click="OnTemplateClick" />
             </Grid>
 
-            <Button Content="Отмена"
-                    Width="100"
-                    Height="23"
-                    IsCancel="True" />
+            <Grid Width="270" Height="23">
+                <Button Content="Отмена"
+                        Width="100"
+                        Height="23"
+                        HorizontalAlignment="Center"
+                        IsCancel="True" />
+                <TextBlock x:Name="BuildDateText"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Bottom"
+                           Foreground="Black"
+                           FontSize="8" />
+            </Grid>
         </StackPanel>
     </Border>
 </Window>

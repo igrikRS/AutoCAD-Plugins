@@ -29,7 +29,7 @@ namespace LayoutsFromModel
         public LayoutsCreationDialog()
         {
             InitializeComponent();
-            Title = $"{Title} ({GetAssemblyBuildDate():dd.MM.yyyy})";
+            BuildDateText.Text = $"Сборка от {GetAssemblyBuildDate():dd.MM.yyyy}";
             SelectedAction = LayoutsCreationAction.None;
         }
 
