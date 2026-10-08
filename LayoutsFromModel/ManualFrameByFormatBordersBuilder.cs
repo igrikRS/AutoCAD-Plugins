@@ -16,6 +16,8 @@ namespace LayoutsFromModel
     {
         private readonly Editor ed;
 
+        private const double FORMAT_RATIO = 1.414141;
+
         public int InitialBorderIndex { get; set; }
 
         public ManualFrameByFormatBordersBuilder()
@@ -69,7 +71,14 @@ namespace LayoutsFromModel
 
                     double width = Math.Abs(borderResult.FirstPoint.X - borderResult.SecondPoint.X);
                     double height = Math.Abs(borderResult.FirstPoint.Y - borderResult.SecondPoint.Y);
-                    double scale = Math.Min(width, height) / formatDialog.SelectedShortSide;
+
+                    double multiplicity = Math.Max(width, height) / Math.Min(width, height);
+                    double shortSideSize = (multiplicity > FORMAT_RATIO + 0.25)
+                        ? formatDialog.SelectedShortSide * FORMAT_RATIO
+                        : formatDialog.SelectedShortSide;
+
+                    double scale = Math.Min(width, height) / shortSideSize;
+
                     if (scale <= 0)
                     {
                         ed.WriteMessage("\nРазмер рамки должен быть больше нуля");
