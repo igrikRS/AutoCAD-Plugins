@@ -33,6 +33,23 @@ namespace LayoutsFromModel
         /// <param name="borders">Границы выделенной области в пространстве модели</param>
         public void CreateLayout(DrawingBorders borders)
         {
+            CreateLayout(borders, null);
+        }
+
+        /// <summary>
+        /// Создаёт Layout и проверяет запрос отмены между безопасными этапами.
+        /// Начатый Layout всегда доводится до корректного состояния.
+        /// </summary>
+        /// <param name="borders">Границы выделенной области в пространстве модели.</param>
+        /// <param name="isCancellationRequested">Проверка запроса отмены.</param>
+        /// <returns>False, если после проверки нужно прекратить создание листов.</returns>
+        public bool CreateLayout(DrawingBorders borders, Func<bool> isCancellationRequested)
+        {
+            if (CancellationRequested(isCancellationRequested))
+                return false;
+
+            bool stopAfterCurrentLayout = false;
+
             // получаем название листа
             string layoutName = CheckLayoutName(borders.Name);
             // получаем/объявляем классы листа
@@ -62,6 +79,7 @@ namespace LayoutsFromModel
                 tr.Commit();
             }
 
+            stopAfterCurrentLayout = CancellationRequested(isCancellationRequested);
 
             // эту херню необходимо вынести из транзакции, иначе AutoCAD2016 получает Exception(eSetFailed)
             // © https://adn-cis.org/forum/index.php?topic=2723.msg12312#msg12312
@@ -82,11 +100,24 @@ namespace LayoutsFromModel
             this.ed.WriteMessage("\nСоздаётся лист \"{0}\" размером: {1}x{2} \n", layout.LayoutName, x, y);
             this.ed.ZoomWindow(new Point3d(0, 0, 0), new Point3d(x, y, 0));
 
+            if (!stopAfterCurrentLayout)
+                stopAfterCurrentLayout = CancellationRequested(isCancellationRequested);
+
             using (Transaction tr = this.wdb.TransactionManager.StartTransaction())
             {
                 CreateViewport(layout, borders, tr);
                 tr.Commit();
             }
+
+            if (!stopAfterCurrentLayout)
+                stopAfterCurrentLayout = CancellationRequested(isCancellationRequested);
+
+            return !stopAfterCurrentLayout;
+        }
+
+        private static bool CancellationRequested(Func<bool> isCancellationRequested)
+        {
+            return isCancellationRequested != null && isCancellationRequested();
         }
 
         /// <summary>

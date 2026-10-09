@@ -98,6 +98,9 @@
     <Compile Include="..\LayoutsFromModel\Helpers\CompareHelper.cs">
       <Link>Helpers\CompareHelper.cs</Link>
     </Compile>
+    <Compile Include="..\LayoutsFromModel\Helpers\EscapeCancellation.cs">
+      <Link>Helpers\EscapeCancellation.cs</Link>
+    </Compile>
     <Compile Include="..\LayoutsFromModel\IBordersCollectionBuilder.cs">
       <Link>IBordersCollectionBuilder.cs</Link>
     </Compile>

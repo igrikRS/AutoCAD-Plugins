@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Bargool.Acad.Library;
+using LayoutsFromModel.Helpers;
 
 [assembly: CommandClass(typeof(LayoutsFromModel.CommandClass))]
 
@@ -104,18 +105,31 @@ namespace LayoutsFromModel
             stopwatch.Start();
 
             LayoutCreator layoutCreator = new LayoutCreator();
+            EscapeCancellation cancellation = new EscapeCancellation();
+            bool creationCancelled = false;
 
             // Создание листов производим с отключённым кешированием
             using (var sysVariable = new AcadSystemVariableSwitcher("LAYOUTREGENCTL", 0))
             {
                 foreach (DrawingBorders border in borders)
                 {
-                    layoutCreator.CreateLayout(border);
+                    if (!layoutCreator.CreateLayout(border, cancellation.IsCancellationRequested))
+                    {
+                        creationCancelled = true;
+                        break;
+                    }
                 }
             }
 
             stopwatch.Stop();
             ed.WriteMessage("\nВремя выполнения: {0} с\n", stopwatch.ElapsedMilliseconds / 1000);
+
+            if (creationCancelled)
+            {
+                ed.WriteMessage("\nСоздание листов прервано пользователем. Уже созданные листы сохранены.\n");
+                ed.Regen();
+                return;
+            }
 
             Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
 
