@@ -8,6 +8,7 @@ using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
+using Bargool.Acad.Library;
 
 [assembly: CommandClass(typeof(LayoutsFromModel.CommandClass))]
 
@@ -78,60 +79,6 @@ namespace LayoutsFromModel
         }
 
         /// <summary>
-        /// Открывает окно настроек создания листов.
-        /// </summary>
-        [CommandMethod("igrikCreateLayoutsOptions", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
-        public void OpenInitialConfigDialog()
-        {
-            Configuration.AppConfig.Instance.ShowDialog();
-        }
-
-        /// <summary>
-        /// Создаёт листы по рамкам, указанным вручную.
-        /// </summary>
-        [CommandMethod("igrikCreateLayoutsFrames", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
-        public void LayoutFromUserInput()
-        {
-            CreateLayouts(new ManualFrameByLineBordersBuilder());
-        }
-
-        /// <summary>
-        /// Создаёт листы по выбранным блокам.
-        /// </summary>
-        [CommandMethod("bargLFBL", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
-        public void LayoutFromBlocks()
-        {
-            CreateLayouts(new BlocksBordersBuilder());
-        }
-
-        /// <summary>
-        /// Создаёт листы по вручную выбранным блокам и форматкам.
-        /// </summary>
-        [CommandMethod("igrikCreateLayoutsSelect", CommandFlags.Modal | CommandFlags.NoPaperSpace)]
-        public void LayoutFromUserInputBlocks()
-        {
-            CreateLayouts(new UserInputBlocksBordersBuilder());
-        }
-
-        /// <summary>
-        /// Автоматически создаёт листы по блокам-рамкам.
-        /// </summary>
-        [CommandMethod("igrikCreateLayoutsAuto", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
-        public void LayoutFromBlocksAuto()
-        {
-            CreateLayouts(new UserAutoBlocksBordersBuilder());
-        }
-
-        /// <summary>
-        /// Автоматически создаёт листы по форматкам СПДС.
-        /// </summary>
-        [CommandMethod("igrikCreateLayoutsSpds", CommandFlags.Modal | CommandFlags.NoPaperSpace | CommandFlags.UsePickSet)]
-        public void LayoutFromSpdsFormatAuto()
-        {
-            CreateLayouts(new UserSpdsFormatBordersBuilder());
-        }
-
-        /// <summary>
         /// Создаёт листы по границам, полученным выбранным построителем.
         /// </summary>
         /// <param name="bordersBuilder">Построитель границ чертежей.</param>
@@ -157,9 +104,14 @@ namespace LayoutsFromModel
             stopwatch.Start();
 
             LayoutCreator layoutCreator = new LayoutCreator();
-            foreach (DrawingBorders border in borders)
+
+            // Создание листов производим с отключённым кешированием
+            using (var sysVariable = new AcadSystemVariableSwitcher("LAYOUTREGENCTL", 0))
             {
-                layoutCreator.CreateLayout(border);
+                foreach (DrawingBorders border in borders)
+                {
+                    layoutCreator.CreateLayout(border);
+                }
             }
 
             stopwatch.Stop();
