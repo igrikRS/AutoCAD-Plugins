@@ -73,7 +73,7 @@ namespace LayoutsFromModel
                 pio.AllowNone = false;
                 pio.DefaultValue = this.index;
                 piRes = ed.GetInteger(pio);
-                // TODO Обрабатывать выход по escape
+
                 switch (piRes.Status)
                 {
                     // Введён номер - продолжаем

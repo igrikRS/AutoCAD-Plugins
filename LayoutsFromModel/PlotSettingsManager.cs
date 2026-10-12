@@ -65,7 +65,6 @@ namespace LayoutsFromModel
                     }
                     return work;
                 });
-
         }
 
         #region ICollection members

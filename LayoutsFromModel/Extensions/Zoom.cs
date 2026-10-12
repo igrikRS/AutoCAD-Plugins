@@ -49,6 +49,8 @@ namespace Autodesk.AutoCAD.EditorInput
             if (editor == null)
                 throw new ArgumentNullException("Editor is null");
 
+            if (scale == 0) scale = 1.0;
+
             using (ViewTableRecord view = editor.GetCurrentView())
             {
                 center = center.TransformBy(view.WorldToEye());
@@ -88,10 +90,12 @@ namespace Autodesk.AutoCAD.EditorInput
             }
         }
 
-        public static void ZoomScale(this Editor editor, double scale)
+        public static void ZoomScale(this Editor editor, double scale = 1.0)
         {
             if (editor == null)
                 throw new ArgumentNullException("Editor is null");
+
+            if (scale == 0) scale = 1.0;
 
             using (ViewTableRecord view = editor.GetCurrentView())
             {
