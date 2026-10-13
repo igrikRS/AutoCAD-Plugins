@@ -11,6 +11,7 @@ namespace LayoutsFromModel
         ManualBlocks,
         ManualFrameByLine,
         ManualFrameByFormat,
+        SortLayouts,
         DeleteLayouts,
         Settings,
         Template
@@ -83,6 +84,14 @@ namespace LayoutsFromModel
         private void OnDeleteLayoutsClick(object sender, RoutedEventArgs e)
         {
             Complete(LayoutsCreationAction.DeleteLayouts);
+        }
+
+        /// <summary>
+        /// Выбирает сортировку существующих листов.
+        /// </summary>
+        private void OnSortLayoutsClick(object sender, RoutedEventArgs e)
+        {
+            Complete(LayoutsCreationAction.SortLayouts);
         }
 
         /// <summary>

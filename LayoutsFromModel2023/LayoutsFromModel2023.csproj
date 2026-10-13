@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
@@ -128,7 +129,7 @@
     <Compile Include="..\LayoutsFromModel\PromptResultStatus.cs">
       <Link>PromptResultStatus.cs</Link>
     </Compile>
-        <Compile Include="..\LayoutsFromModel\Properties\CmdOptions.Designer.cs">
+    <Compile Include="..\LayoutsFromModel\Properties\CmdOptions.Designer.cs">
       <Link>Properties\CmdOptions.Designer.cs</Link>
       <DependentUpon>CmdOptions.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -172,7 +173,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-  <Page Include="..\LayoutsFromModel\Configuration\ConfigurationDialog.xaml">
+    <Page Include="..\LayoutsFromModel\Configuration\ConfigurationDialog.xaml">
       <Link>Configuration\ConfigurationDialog.xaml</Link>
       <SubType>Designer</SubType>
     </Page>
@@ -181,7 +182,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="..\LayoutsFromModel\Properties\CmdOptions.resx">
       <Link>Properties\CmdOptions.resx</Link>
       <Generator>PublicResXFileCodeGenerator</Generator>

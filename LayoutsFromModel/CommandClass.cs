@@ -54,6 +54,9 @@ namespace LayoutsFromModel
                     case LayoutsCreationAction.ManualFrameByFormat:
                         bordersBuilder = new ManualFrameByFormatBordersBuilder();
                         break;
+                    case LayoutsCreationAction.SortLayouts:
+                        new LayoutCreator().SortLayouts();
+                        continue;
                     case LayoutsCreationAction.DeleteLayouts:
                         System.Windows.MessageBoxResult confirmation = System.Windows.MessageBox.Show(
                             "Вы уверены, что хотите удалить все существующие листы?",

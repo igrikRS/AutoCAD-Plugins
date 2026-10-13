@@ -309,5 +309,56 @@ namespace LayoutsFromModel
                 "\nСуществующие листы удалены. Оставшийся лист переименован в \"Y\".\n");
         }
 
+        /// <summary>
+        /// Сортирует вкладки существующих листов по имени в естественном порядке.
+        /// Вкладка модели в сортировке не участвует и остаётся первой.
+        /// </summary>
+        public void SortLayouts()
+        {
+            var layouts = new List<KeyValuePair<ObjectId, string>>();
+
+            using (Transaction tr = wdb.TransactionManager.StartTransaction())
+            {
+                DBDictionary dictionary =
+                    (DBDictionary)tr.GetObject(wdb.LayoutDictionaryId, OpenMode.ForRead);
+                foreach (DBDictionaryEntry entry in dictionary)
+                {
+                    Layout layout = (Layout)tr.GetObject(entry.Value, OpenMode.ForRead);
+                    if (!layout.ModelType)
+                    {
+                        layouts.Add(new KeyValuePair<ObjectId, string>(
+                            entry.Value,
+                            layout.LayoutName));
+                    }
+                }
+
+                layouts.Sort((left, right) =>
+                {
+                    string leftKey = CompareHelper.AlphanumericCompare(left.Value);
+                    string rightKey = CompareHelper.AlphanumericCompare(right.Value);
+                    int result = string.Compare(
+                        leftKey,
+                        rightKey,
+                        StringComparison.CurrentCultureIgnoreCase);
+
+                    return result != 0
+                        ? result
+                        : string.Compare(left.Value, right.Value, StringComparison.CurrentCulture);
+                });
+
+                for (int i = 0; i < layouts.Count; i++)
+                {
+                    Layout layout =
+                        (Layout)tr.GetObject(layouts[i].Key, OpenMode.ForWrite);
+                    layout.TabOrder = i + 1;
+                }
+
+                tr.Commit();
+            }
+
+            ed.Regen();
+            ed.WriteMessage("\nСуществующие листы отсортированы по возрастанию.\n");
+        }
+
     }
 }

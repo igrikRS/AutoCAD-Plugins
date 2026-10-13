@@ -32,6 +32,9 @@
             <Button Content="Ручной выбор рамкой"
                     Style="{StaticResource MainButtonStyle}"
                     Click="OnManualFrameClick" />
+            <Button Content="Отсортировать существующие листы"
+                    Style="{StaticResource MainButtonStyle}"
+                    Click="OnSortLayoutsClick" />
             <Button Content="Удалить существующие листы"
                     Style="{StaticResource MainButtonStyle}"
                     Click="OnDeleteLayoutsClick" />
