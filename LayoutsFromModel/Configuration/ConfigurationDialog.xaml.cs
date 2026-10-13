@@ -91,19 +91,19 @@ namespace LayoutsFromModel.Configuration
         /// </summary>
         void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Prefix = txtPrefix.Text;
-            Suffix = txtSuffix.Text;
+            Prefix = txtPrefix.Text.Trim();
+            Suffix = txtSuffix.Text.Trim();
             int precision;
-            Precision = int.TryParse(txtPrecision.Text, out precision) ? (int?)Math.Abs(precision) : null;
+            Precision = int.TryParse(txtPrecision.Text.Trim(), out precision) ? (int?)Math.Abs(precision) : null;
             DelNonInitializedLayouts = chkDeleteNonInitialized.IsChecked??false;
             this.TilemodeOn = chkTileModeOn.IsChecked??false;
-            this.BlockName = txtBlockName.Text;
-            this.TagName = txtTagName.Text;
+            this.BlockName = txtBlockName.Text.Trim();
+            this.TagName = txtTagName.Text.Trim();
             this.LockViewPorts = chkLockVP.IsChecked ?? false;
             this.ManualFrameWithPaperFormat = chkManualFrameWithPaperFormat.IsChecked ?? false;
 
             int outBlockRatioScale;
-            this.BlockRatioScale = int.TryParse(txtBlockRatioScale.Text, out outBlockRatioScale)
+            this.BlockRatioScale = int.TryParse(txtBlockRatioScale.Text.Trim(), out outBlockRatioScale)
                                     ? (int?)Math.Abs(outBlockRatioScale) : 1;
         }
     }
