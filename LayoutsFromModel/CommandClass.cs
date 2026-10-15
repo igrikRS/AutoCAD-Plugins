@@ -117,17 +117,43 @@ namespace LayoutsFromModel
             //  - viewport.On = false
             var viewportIds = new List<ObjectId>();
 
-            // Создание листов производим с отключённым кешированием
-            using (var sysVariable = new AcadSystemVariableSwitcher("LAYOUTREGENCTL", 0))
+            var progressDialog = new LayoutsProgressDialog(borders.Length);
+            acad.ShowModelessWindow(progressDialog);
+            progressDialog.CenterOnAutoCadMonitor(acad.MainWindow.Handle);
+            progressDialog.UpdateProgress(0, borders.Length);
+
+            try
             {
-                foreach (DrawingBorders border in borders)
+                // Создание листов производим с отключённым кешированием
+                using (var sysVariable = new AcadSystemVariableSwitcher("LAYOUTREGENCTL", 0))
                 {
-                    if (!layoutCreator.CreateLayout(border, viewportIds, cancellation.IsCancellationRequested))
+                    foreach (DrawingBorders border in borders)
                     {
-                        creationCancelled = true;
-                        break;
+                        int createdBefore = viewportIds.Count;
+                        bool continueCreation = layoutCreator.CreateLayout(
+                            border,
+                            viewportIds,
+                            () => progressDialog.IsCancellationRequested ||
+                                  cancellation.IsCancellationRequested());
+
+                        if (viewportIds.Count > createdBefore)
+                        {
+                            progressDialog.UpdateProgress(
+                                viewportIds.Count,
+                                borders.Length);
+                        }
+
+                        if (!continueCreation)
+                        {
+                            creationCancelled = true;
+                            break;
+                        }
                     }
                 }
+            }
+            finally
+            {
+                progressDialog.CloseProgress();
             }
 
             stopwatch.Stop();

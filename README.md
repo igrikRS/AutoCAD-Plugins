@@ -16,7 +16,7 @@
 Для пользователя доступна одна основная команда "igrikCreateLayouts" (алиас "bargLFM")
 
 ## Окно выбора действия:
-![](https://i.ibb.co/m5nx5vhV/Layouts-From-Model-1.png)
+![](https://i.ibb.co/SwqRVPZg/Layouts-From-Model-1.png)
 
 **Автоматический выбор блоков**
 >Автоматическое создание листов по всем блокам на чертеже с сортировкой их по номеру листа.
@@ -53,7 +53,7 @@
 >Позволяет указать где расположен шаблон форматов листов "lfmtemplate.dwt"
 
 ## Конфигурация:
-![](https://i.ibb.co/5hm75Y1W/Layouts-From-Model-2.png)
+![](https://i.ibb.co/RTSvs3tk/Layouts-From-Model-2.png)
 ### Файл конфигурации. Имя файла - lfmsettings.xml. Всегда хранится рядом с программой
 
 **Префикс**

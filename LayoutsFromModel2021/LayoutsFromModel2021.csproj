@@ -83,6 +83,9 @@
       <Link>LayoutsCreationDialog.xaml.cs</Link>
       <DependentUpon>LayoutsCreationDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="..\LayoutsFromModel\LayoutsProgressDialog.cs">
+      <Link>LayoutsProgressDialog.cs</Link>
+    </Compile>
     <Compile Include="..\LayoutsFromModel\DrawingBorders.cs">
       <Link>DrawingBorders.cs</Link>
     </Compile>

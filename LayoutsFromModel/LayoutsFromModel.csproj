@@ -124,6 +124,7 @@
       <DependentUpon>LayoutsCreationDialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="LayoutsProgressDialog.cs" />
     <Compile Include="Configuration\PrecisionValidationRule.cs">
       <DependentUpon>ConfigurationDialog.xaml</DependentUpon>
     </Compile>
