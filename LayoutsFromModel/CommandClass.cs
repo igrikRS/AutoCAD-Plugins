@@ -7,6 +7,7 @@ using System.Diagnostics;
 // Autodesk
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using acad = Autodesk.AutoCAD.ApplicationServices.Application;
 using Bargool.Acad.Library;
 using LayoutsFromModel.Helpers;
@@ -111,12 +112,17 @@ namespace LayoutsFromModel
             EscapeCancellation cancellation = new EscapeCancellation();
             bool creationCancelled = false;
 
+            // Коллекция созданных viewports, которые необходимо будет включить массово.
+            // Для ускоренного создания листов - создание необходимо производить:
+            //  - viewport.On = false
+            var viewportIds = new List<ObjectId>();
+
             // Создание листов производим с отключённым кешированием
             using (var sysVariable = new AcadSystemVariableSwitcher("LAYOUTREGENCTL", 0))
             {
                 foreach (DrawingBorders border in borders)
                 {
-                    if (!layoutCreator.CreateLayout(border, cancellation.IsCancellationRequested))
+                    if (!layoutCreator.CreateLayout(border, viewportIds, cancellation.IsCancellationRequested))
                     {
                         creationCancelled = true;
                         break;
@@ -127,23 +133,15 @@ namespace LayoutsFromModel
             stopwatch.Stop();
             ed.WriteMessage("\nВремя выполнения: {0} с\n", stopwatch.ElapsedMilliseconds / 1000);
 
+            // Возвращаемся в модель
+            acad.SetSystemVariable("TILEMODE", 1);
+
+            // Включаем массово viewports
+            layoutCreator.SetViewportsOn(viewportIds);
+
             if (creationCancelled)
             {
                 ed.WriteMessage("\nСоздание листов прервано пользователем. Уже созданные листы сохранены.\n");
-                ed.Regen();
-                return;
-            }
-
-            Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
-
-            // Если в конфигурации отмечено "возвращаться в модель" - то переходим в модель
-            if (cfg.TilemodeOn)
-                acad.SetSystemVariable("TILEMODE", 1);
-
-            // Если в конфигурации отмечено "удалять неинициализированные листы" - удаляем их
-            if (cfg.DeleteNonInitializedLayouts)
-            {
-                layoutCreator.DeleteNoninitializedLayouts();
             }
 
             ed.Regen();

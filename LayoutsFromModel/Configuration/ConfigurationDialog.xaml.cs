@@ -18,14 +18,10 @@ namespace LayoutsFromModel.Configuration
     /// </summary>
     public partial class ConfigurationDialog : Window
     {
-        // TODO: Напрямую связать конфигурацию и поля ввода окна
         public string Prefix { get; private set; }
         public string Suffix { get; private set; }
         public int? Precision { get; set; }
-        public bool DelNonInitializedLayouts { get; set; }
-        
         public double? ReferenceDimension { get; set; }
-        public bool TilemodeOn { get; set; }
         
         public string BlockName { get; set; }
         public string TagName { get; set; }
@@ -46,7 +42,7 @@ namespace LayoutsFromModel.Configuration
         /// </summary>
         public ConfigurationDialog
             (string prefix, string suffix, Nullable<int> precision,
-            bool delNonInitializedLayouts, double referenceDimension, bool tilemodeOn, 
+            double referenceDimension,
             string blockname, string tagname, int blockRatioScale, bool lockViewPorts,
             bool manualFrameWithPaperFormat)
             :this()
@@ -54,9 +50,7 @@ namespace LayoutsFromModel.Configuration
             this.Prefix = prefix;
             this.Suffix = suffix;
             this.Precision = precision;
-            this.DelNonInitializedLayouts = delNonInitializedLayouts;
             this.ReferenceDimension = referenceDimension;
-            this.TilemodeOn = tilemodeOn;
             this.BlockName = blockname;
             this.TagName = tagname;
             this.BlockRatioScale = blockRatioScale;
@@ -72,8 +66,6 @@ namespace LayoutsFromModel.Configuration
             txtPrefix.Text = this.Prefix;
             txtSuffix.Text = this.Suffix;
             txtPrecision.Text = this.Precision.ToString();
-            chkDeleteNonInitialized.IsChecked = this.DelNonInitializedLayouts;
-            chkTileModeOn.IsChecked = this.TilemodeOn;
             txtBlockName.Text = this.BlockName;
             txtTagName.Text = this.TagName;
             txtBlockRatioScale.Text = this.BlockRatioScale.ToString();
@@ -94,8 +86,6 @@ namespace LayoutsFromModel.Configuration
                             ? (int?)Math.Abs(precision)
                             : null;
 
-            this.DelNonInitializedLayouts = chkDeleteNonInitialized.IsChecked??false;
-            this.TilemodeOn = chkTileModeOn.IsChecked ?? false;
             this.BlockName = txtBlockName.Text.Trim();
             this.TagName = txtTagName.Text.Trim();
             this.LockViewPorts = chkLockVP.IsChecked ?? false;

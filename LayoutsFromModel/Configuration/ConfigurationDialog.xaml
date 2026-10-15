@@ -46,14 +46,6 @@
                 </TextBox.Text>-->
             </TextBox>
             <CheckBox
-                Name="chkDeleteNonInitialized"
-                Content="Удалять неинициализированные листы"
-                Margin="0" />
-            <CheckBox
-                Name="chkTileModeOn"
-                Content="Оставаться в модели по окончании работы"
-                Margin="0" />
-            <CheckBox
                 Name="chkLockVP"
                 Content="Блокировать созданные видовые экраны"
                 Margin="0" />

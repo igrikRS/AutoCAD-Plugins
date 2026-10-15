@@ -31,9 +31,12 @@ namespace LayoutsFromModel
         /// Метод создаёт Layout по заданным параметрам
         /// </summary>
         /// <param name="borders">Границы выделенной области в пространстве модели</param>
-        public void CreateLayout(DrawingBorders borders)
+        public bool CreateLayout(DrawingBorders borders)
         {
-            CreateLayout(borders, null);
+            var viewportIds = new List<ObjectId>();
+            bool result = CreateLayout(borders, viewportIds, null);
+            SetViewportsOn(viewportIds);
+            return result;
         }
 
         /// <summary>
@@ -41,9 +44,10 @@ namespace LayoutsFromModel
         /// Начатый Layout всегда доводится до корректного состояния.
         /// </summary>
         /// <param name="borders">Границы выделенной области в пространстве модели.</param>
+        /// <param name="viewportIds">Идентификаторы созданных видовых экранов.</param>
         /// <param name="isCancellationRequested">Проверка запроса отмены.</param>
         /// <returns>False, если после проверки нужно прекратить создание листов.</returns>
-        public bool CreateLayout(DrawingBorders borders, Func<bool> isCancellationRequested)
+        public bool CreateLayout(DrawingBorders borders, List<ObjectId> viewportIds, Func<bool> isCancellationRequested)
         {
             if (CancellationRequested(isCancellationRequested))
                 return false;
@@ -105,7 +109,8 @@ namespace LayoutsFromModel
 
             using (Transaction tr = this.wdb.TransactionManager.StartTransaction())
             {
-                CreateViewport(layout, borders, tr);
+                var viewport = CreateViewport(layout, borders, tr);
+                viewportIds.Add(viewport.ObjectId);
                 tr.Commit();
             }
 
@@ -115,17 +120,12 @@ namespace LayoutsFromModel
             return !stopAfterCurrentLayout;
         }
 
-        private static bool CancellationRequested(Func<bool> isCancellationRequested)
-        {
-            return isCancellationRequested != null && isCancellationRequested();
-        }
-
         /// <summary>
         /// Метод создаёт Viewport на заданном Layout, в размер листа
         /// </summary>
         /// <param name="layout">Layout, на котором создаётся viewport</param>
         /// <param name="borders">Границы выделенной области в модели</param>
-        public void CreateViewport(Layout layout, DrawingBorders borders, Transaction tr)
+        public Viewport CreateViewport(Layout layout, DrawingBorders borders, Transaction tr)
         {
             int vpCount = layout.GetViewports().Count;
             if (vpCount == 0)
@@ -146,7 +146,7 @@ namespace LayoutsFromModel
                 viewport.SetDatabaseDefaults();
                 paperSpace.AppendEntity(viewport);
                 tr.AddNewlyCreatedDBObject(viewport, true);
-                viewport.On = true; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
+                // viewport.On = true; // вот это заставляет вьюпорты обновляться и создаваться очень-очень долго
             }
             else
             {
@@ -169,6 +169,39 @@ namespace LayoutsFromModel
             viewport.ViewHeight = borders.Height;
             viewport.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
             viewport.Locked = Configuration.AppConfig.Instance.LockViewPorts;
+            viewport.On = false;
+
+            return viewport;
+        }
+
+        /// <summary>
+        /// Устанавливает коллекции видовых экранов параметр "Вкл" = Да.
+        /// </summary>
+        /// <param name="viewportIds">Коллекция видовых экранов</param>
+        internal void SetViewportsOn(ICollection<ObjectId> viewportIds)
+        {
+            if (viewportIds.Count == 0)
+                return;
+
+            using (Transaction tr = this.wdb.TransactionManager.StartTransaction())
+            {
+                foreach (ObjectId viewportId in viewportIds)
+                {
+                    Viewport viewport = (Viewport)tr.GetObject(viewportId, OpenMode.ForWrite);
+                    viewport.On = true;
+                }
+
+                tr.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Запрос отмены операции пользователем в момент генерации листов и видовых экранов.
+        /// </summary>
+        /// <param name="isCancellationRequested"></param>
+        private static bool CancellationRequested(Func<bool> isCancellationRequested)
+        {
+            return isCancellationRequested != null && isCancellationRequested();
         }
 
         /// <summary>
@@ -227,35 +260,6 @@ namespace LayoutsFromModel
                 psDict.DowngradeOpen();
             }
             return ps;
-        }
-
-        /// <summary>
-        /// Метод удаляет неинициализированные листы
-        /// </summary>
-        public void DeleteNoninitializedLayouts()
-        {
-            using (Transaction tr = wdb.TransactionManager.StartTransaction())
-            {
-                DBDictionary dic = (DBDictionary)tr.GetObject(wdb.LayoutDictionaryId, OpenMode.ForRead);
-                foreach (DBDictionaryEntry entry in dic)
-                {
-                    Layout layout = (Layout)tr.GetObject(entry.Value, OpenMode.ForRead);
-                    if (!layout.ModelType && layout.GetViewports().Count == 0)
-                    {
-                        if (dic.Count > 1)
-                        {
-                            if (!dic.IsWriteEnabled)
-                                dic.UpgradeOpen();
-                            dic.Remove(entry.Value);
-                            layout.UpgradeOpen();
-                            layout.Erase(true);
-                            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager
-                                .MdiActiveDocument.Editor.WriteMessage("\nУдаляю лист " + layout.LayoutName + Environment.NewLine);
-                        }
-                    }
-                }
-                tr.Commit();
-            }
         }
 
         /// <summary>

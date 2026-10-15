@@ -44,16 +44,6 @@ namespace LayoutsFromModel.Configuration
             set { precision = value; }
         }
 
-        bool deleteNonInitializedLayouts = false;
-        /// <summary>
-        /// Удалять ли неинициализированные листы
-        /// </summary>
-        public bool DeleteNonInitializedLayouts
-        {
-            get { return deleteNonInitializedLayouts; }
-            set { deleteNonInitializedLayouts = value; }
-        }
-
         double referenceDimension = 185.0;
         /// <summary>
         /// Эталонный размер. Используется для определения масштаба чертежа при
@@ -63,16 +53,6 @@ namespace LayoutsFromModel.Configuration
         {
             get { return referenceDimension; }
             set { referenceDimension = value; }
-        }
-
-        bool tilemodeOn = true;
-        /// <summary>
-        /// Возвращаться ли в модель по окончанию созданию листов
-        /// </summary>
-        public bool TilemodeOn
-        {
-            get { return tilemodeOn; }
-            set { tilemodeOn = value; }
         }
 
         string templatePath = "";
@@ -215,9 +195,7 @@ namespace LayoutsFromModel.Configuration
         public void ShowDialog()
         {
             ConfigurationDialog win = new ConfigurationDialog(Prefix, Suffix,
-                                                              Precision, DeleteNonInitializedLayouts,
-                                                              ReferenceDimension,
-                                                              TilemodeOn,
+                                                              Precision, ReferenceDimension,
                                                               BlockName,
                                                               TagName,
                                                               BlockRatioScale,
@@ -229,8 +207,6 @@ namespace LayoutsFromModel.Configuration
                 this.Prefix = win.Prefix;
                 this.Suffix = win.Suffix;
                 this.Precision = win.Precision ?? new AppConfig().Precision;
-                this.DeleteNonInitializedLayouts = win.DelNonInitializedLayouts;
-                this.TilemodeOn = win.TilemodeOn;
                 this.BlockName = win.BlockName;
                 this.TagName = win.TagName;
                 this.BlockRatioScale = win.BlockRatioScale ?? new AppConfig().blockRatioScale;
@@ -270,8 +246,8 @@ namespace LayoutsFromModel.Configuration
         public override string ToString()
         {
             return string.Format(
-                "[Configuration Prefix={0}, Suffix={1}, Precision={2}, DeleteNonInitializedLayouts={3}, ReferenceDimension={4}, TilemodeOn={5}]",
-                Prefix, Suffix, Precision, DeleteNonInitializedLayouts, ReferenceDimension, TilemodeOn);
+                "[Configuration Prefix={0}, Suffix={1}, Precision={2}, ReferenceDimension={3}]",
+                Prefix, Suffix, Precision, ReferenceDimension);
         }
     }
 }
