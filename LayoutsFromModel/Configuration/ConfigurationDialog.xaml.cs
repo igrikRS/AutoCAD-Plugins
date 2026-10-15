@@ -7,6 +7,9 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using AcadDocument = Autodesk.AutoCAD.ApplicationServices.Document;
 
 namespace LayoutsFromModel.Configuration
 {
@@ -77,26 +80,22 @@ namespace LayoutsFromModel.Configuration
             chkLockVP.IsChecked = this.LockViewPorts;
             chkManualFrameWithPaperFormat.IsChecked = this.ManualFrameWithPaperFormat;
         }
-        
-        /// <summary>
-        /// Подтверждает изменения настроек.
-        /// </summary>
-        void OnButtonOkClick(object sender, RoutedEventArgs e)
-        {
-            this.DialogResult = true;
-        }
-        
+
         /// <summary>
         /// Считывает значения элементов перед закрытием окна.
         /// </summary>
         void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Prefix = txtPrefix.Text.Trim();
-            Suffix = txtSuffix.Text.Trim();
+            this.Prefix = txtPrefix.Text.Trim();
+            this.Suffix = txtSuffix.Text.Trim();
+
             int precision;
-            Precision = int.TryParse(txtPrecision.Text.Trim(), out precision) ? (int?)Math.Abs(precision) : null;
-            DelNonInitializedLayouts = chkDeleteNonInitialized.IsChecked??false;
-            this.TilemodeOn = chkTileModeOn.IsChecked??false;
+            this.Precision = int.TryParse(txtPrecision.Text.Trim(), out precision)
+                            ? (int?)Math.Abs(precision)
+                            : null;
+
+            this.DelNonInitializedLayouts = chkDeleteNonInitialized.IsChecked??false;
+            this.TilemodeOn = chkTileModeOn.IsChecked ?? false;
             this.BlockName = txtBlockName.Text.Trim();
             this.TagName = txtTagName.Text.Trim();
             this.LockViewPorts = chkLockVP.IsChecked ?? false;
@@ -105,6 +104,87 @@ namespace LayoutsFromModel.Configuration
             int outBlockRatioScale;
             this.BlockRatioScale = int.TryParse(txtBlockRatioScale.Text.Trim(), out outBlockRatioScale)
                                     ? (int?)Math.Abs(outBlockRatioScale) : 1;
+        }
+
+        /// <summary>
+        /// Подтверждает изменения настроек.
+        /// </summary>
+        void OnButtonOkClick(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = true;
+        }
+
+        /// <summary>
+        /// Запрашивает вхождение блока и тег атрибута для номера листа.
+        /// </summary>
+        void OnSelectBlockNameClick(object sender, RoutedEventArgs e)
+        {
+            AcadDocument document = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            if (document == null)
+                return;
+
+            string selectedBlockName = null;
+            string selectedTagName = null;
+            using (document.Editor.StartUserInteraction(this))
+            {
+                while (true)
+                {
+                    PromptEntityOptions blockOptions = new PromptEntityOptions("\nВыберите блок-рамку:");
+                    blockOptions.SetRejectMessage("\nНеобходимо выбрать блок.");
+                    blockOptions.AddAllowedClass(typeof(BlockReference), false);
+
+                    PromptEntityResult blockResult = document.Editor.GetEntity(blockOptions);
+                    if (blockResult.Status != PromptStatus.OK)
+                        return;
+
+                    List<string> tagNames = new List<string>();
+                    HashSet<string> uniqueTagNames = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+                    using (Transaction transaction = document.Database.TransactionManager.StartTransaction())
+                    {
+                        BlockReference blockReference = (BlockReference)transaction.GetObject(
+                            blockResult.ObjectId, OpenMode.ForRead);
+                        ObjectId definitionId = blockReference.IsDynamicBlock
+                            ? blockReference.DynamicBlockTableRecord
+                            : blockReference.BlockTableRecord;
+                        BlockTableRecord definition = (BlockTableRecord)transaction.GetObject(
+                            definitionId, OpenMode.ForRead);
+                        selectedBlockName = definition.Name;
+
+                        foreach (ObjectId attributeId in blockReference.AttributeCollection)
+                        {
+                            AttributeReference attribute = (AttributeReference)transaction.GetObject(
+                                attributeId, OpenMode.ForRead);
+                            if (!string.IsNullOrWhiteSpace(attribute.Tag) && uniqueTagNames.Add(attribute.Tag))
+                                tagNames.Add(attribute.Tag);
+                        }
+
+                        transaction.Commit();
+                    }
+
+                    if (tagNames.Count == 0)
+                    {
+                        document.Editor.WriteMessage(
+                            "\nДанный блок не имеет тегов для указания номера листа. Выберите другой блок.");
+                        continue;
+                    }
+
+                    PromptKeywordOptions tagOptions = new PromptKeywordOptions(
+                        "\nВыберите тег для указания номера листа:");
+                    tagOptions.AllowNone = false;
+                    foreach (string tagName in tagNames)
+                        tagOptions.Keywords.Add(tagName);
+
+                    PromptResult tagResult = document.Editor.GetKeywords(tagOptions);
+                    if (tagResult.Status != PromptStatus.OK)
+                        return;
+
+                    selectedTagName = tagResult.StringResult;
+                    break;
+                }
+            }
+
+            txtBlockName.Text = selectedBlockName;
+            txtTagName.Text = selectedTagName;
         }
     }
 }

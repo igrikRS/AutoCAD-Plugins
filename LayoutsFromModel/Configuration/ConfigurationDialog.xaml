@@ -62,9 +62,25 @@
                 Content="Ручной выбор с указанием формата листа"
                 Margin="0,0,0,8" />
             <Label Content="Имя блока-рамки для определения чертежей:" />
-            <TextBox
-                Name="txtBlockName"
-                ToolTip="Имя блока рамки для определения чертежей"/>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    Grid.Column="0"
+                    Name="txtBlockName"
+                    Margin="0"
+                    ToolTip="Имя блока рамки для определения чертежей"/>
+                <Button
+                    Grid.Column="1"
+                    Name="btnSelectBlock"
+                    Content="+"
+                    Width="30"
+                    Margin="4,0,0,0"
+                    ToolTip="Выбрать блок в чертеже"
+                    Click="OnSelectBlockNameClick" />
+            </Grid>
             <Label Content="Имя тега в блоке-рамке:" />
             <TextBox
                 Name="txtTagName"
