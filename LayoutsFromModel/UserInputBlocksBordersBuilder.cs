@@ -30,7 +30,7 @@ namespace LayoutsFromModel
         /// <summary>
         /// Получает границы выбранных блоков и форматок СПДС.
         /// </summary>
-        public DrawingBorders[] GetDrawingBorders()
+        public List<DrawingBorders> GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
 
@@ -86,7 +86,7 @@ namespace LayoutsFromModel
                                 borders.Clear();
                                 tr.Commit();
                                 ed.Regen();
-                                return borders.ToArray();
+                                return borders;
                             }
                             break;
 
@@ -131,7 +131,7 @@ namespace LayoutsFromModel
                 tr.Commit();
             }
 
-            return borders.ToArray();
+            return borders;
         }
 
         /// <summary>

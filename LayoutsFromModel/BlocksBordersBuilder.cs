@@ -19,7 +19,7 @@ namespace LayoutsFromModel
         /// Получение границ из вхождений блоков
         /// </summary>
         /// <returns>Массив границ чертежей</returns>
-        public DrawingBorders[] GetDrawingBorders()
+        public List<DrawingBorders> GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
 
@@ -65,7 +65,7 @@ namespace LayoutsFromModel
                 tr.Commit();
             }
 
-            return borders.ToArray();
+            return borders;
         }
 
         /// <summary>

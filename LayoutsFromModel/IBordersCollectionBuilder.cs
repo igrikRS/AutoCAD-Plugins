@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LayoutsFromModel
 {
@@ -15,6 +16,6 @@ namespace LayoutsFromModel
         /// <summary>
         /// Коллекция рамок-границ по которым создаются листы
         /// </summary>
-        DrawingBorders[] GetDrawingBorders();
+        List<DrawingBorders> GetDrawingBorders();
     }
 }

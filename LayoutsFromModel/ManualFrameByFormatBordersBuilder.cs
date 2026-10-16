@@ -28,7 +28,7 @@ namespace LayoutsFromModel
         /// <summary>
         /// Получает указанные пользователем рамки.
         /// </summary>
-        public DrawingBorders[] GetDrawingBorders()
+        public List<DrawingBorders> GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
             BorderDrawer drawer = new BorderDrawer();
@@ -104,7 +104,7 @@ namespace LayoutsFromModel
             }
 
             drawer.ClearData();
-            return borders.ToArray();
+            return borders;
         }
 
         private void UndoLastBorder(List<DrawingBorders> borders, BorderDrawer drawer)

@@ -96,8 +96,8 @@ namespace LayoutsFromModel
                 return;
             initial.FillPlotInfoManager();
             bordersBuilder.InitialBorderIndex = initial.index;
-            DrawingBorders[] borders = bordersBuilder.GetDrawingBorders();
-            if (borders.Length == 0)
+            List<DrawingBorders> borders = bordersBuilder.GetDrawingBorders();
+            if (borders == null || borders.Count == 0)
             {
                 acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nОтсутствуют элементы для создания листов");
                 return;
@@ -117,10 +117,10 @@ namespace LayoutsFromModel
             //  - viewport.On = false
             var viewportIds = new List<ObjectId>();
 
-            var progressDialog = new LayoutsProgressDialog(borders.Length);
+            var progressDialog = new LayoutsProgressDialog(borders.Count);
             acad.ShowModelessWindow(progressDialog);
             progressDialog.CenterOnAutoCadMonitor(acad.MainWindow.Handle);
-            progressDialog.UpdateProgress(0, borders.Length);
+            progressDialog.UpdateProgress(0, borders.Count);
 
             try
             {
@@ -140,7 +140,7 @@ namespace LayoutsFromModel
                         {
                             progressDialog.UpdateProgress(
                                 viewportIds.Count,
-                                borders.Length);
+                                borders.Count);
                         }
 
                         if (!continueCreation)

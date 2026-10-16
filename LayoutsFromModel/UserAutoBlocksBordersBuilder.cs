@@ -27,7 +27,7 @@ namespace LayoutsFromModel
         /// Получение границ из вхождений блоков
         /// </summary>
         /// <returns>Массив границ чертежей</returns>
-        public DrawingBorders[] GetDrawingBorders()
+        public List<DrawingBorders> GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
             Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager
@@ -50,7 +50,7 @@ namespace LayoutsFromModel
                         ed.WriteMessage(
                             "\nБлоков с именем \"{0}\" на чертеже нет!\n",
                             blockname);
-                        return borders.ToArray();
+                        return borders;
                     }
                     ObjectId btrId = bt[blockname];
 
@@ -100,20 +100,16 @@ namespace LayoutsFromModel
             }
             catch (Exception ex)
             {
-                ed.WriteMessage(
-                    "\nНе удалось автоматически обработать блоки: {0}\n",
-                    ex.Message);
-                return borders.ToArray();
+                ed.WriteMessage("\nНе удалось автоматически обработать блоки: {0}\n", ex.Message);
+                return borders;
             }
 
-            DrawingBorders[] bordersArray = borders.ToArray();
-
-            if (bordersArray.Length < 1)
+            if (borders.Count < 1)
             {
-                ed.WriteMessage($"\n\nБлоков с именем \"{blockname}\" и тегом \"{tagname}\" на чертеже нет!\n");
+                ed.WriteMessage($"\n\nНе найдено блоков с именем \"{blockname}\" и тегом \"{tagname}\".\n");
             }
 
-            return bordersArray;
+            return borders;
         }
 
         /// <summary>

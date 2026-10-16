@@ -38,7 +38,7 @@ namespace LayoutsFromModel
 		/// <summary>
 		/// Получает границы рамок, указанные пользователем.
 		/// </summary>
-		public DrawingBorders[] GetDrawingBorders()
+		public List<DrawingBorders> GetDrawingBorders()
 		{
 			List<DrawingBorders> borders = new List<DrawingBorders>();
 			
@@ -56,7 +56,7 @@ namespace LayoutsFromModel
 					// Получаем масштаб
 					double scale = GetScale(cfg.ReferenceDimension);
 					if (scale == 0)
-						return borders.ToArray();
+						return borders;
 					
 					needNewScale = false;
 					
@@ -114,7 +114,7 @@ namespace LayoutsFromModel
 									ed.WriteMessage("\nОтмена!");
 									drawer.ClearData();
 									borders.Clear();
-									return borders.ToArray();
+									return borders;
 								}
 								
 								break;
@@ -140,7 +140,7 @@ namespace LayoutsFromModel
 				drawer.ClearData();
 				// Возвращаем osmode в исходное состояние
 			}
-			return borders.ToArray();
+			return borders;
 		}
 		
 		/// <summary>

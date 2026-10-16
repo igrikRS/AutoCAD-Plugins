@@ -28,7 +28,7 @@ namespace LayoutsFromModel
         /// <summary>
         /// Получает форматки из предварительного выбора или из пространства модели.
         /// </summary>
-        public DrawingBorders[] GetDrawingBorders()
+        public List<DrawingBorders> GetDrawingBorders()
         {
             var borders = new List<DrawingBorders>();
 
@@ -52,17 +52,17 @@ namespace LayoutsFromModel
                 catch (FileNotFoundException ex)
                 {
                     WriteMultiCadLoadError(ex.Message);
-                    return borders.ToArray();
+                    return borders;
                 }
                 catch (TypeLoadException ex)
                 {
                     WriteMultiCadLoadError(ex.Message);
-                    return borders.ToArray();
+                    return borders;
                 }
                 catch (BadImageFormatException ex)
                 {
                     WriteMultiCadLoadError(ex.Message);
-                    return borders.ToArray();
+                    return borders;
                 }
 
                 Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
@@ -98,7 +98,7 @@ namespace LayoutsFromModel
                 _editor.WriteMessage("\nФорматки СПДС с заполненным свойством Sheet не найдены.\n");
             }
 
-            return borders.ToArray();
+            return borders;
         }
 
         /// <summary>
