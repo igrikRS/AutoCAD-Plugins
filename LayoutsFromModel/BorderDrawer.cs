@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.GraphicsInterface;
 using ADS = Autodesk.AutoCAD.DatabaseServices;
@@ -13,24 +14,62 @@ namespace LayoutsFromModel
 	/// </summary>
 	public class BorderDrawer : IBorderVisitor
 	{
-		List<Drawable> objects = new List<Drawable>();
-		Color graphicsColor = Color.FromColorIndex(ColorMethod.ByLayer, 20);
+		private readonly List<Drawable> objects = new List<Drawable>();
+		private readonly Color graphicsColor = Color.FromColorIndex(ColorMethod.ByLayer, 20);
+		private readonly IntegerCollection viewportNumbers = new IntegerCollection();
+		private readonly Editor ed;
+
+		public BorderDrawer(Editor editor)
+		{
+			this.ed = editor;
+		}
 		
 		/// <summary>
 		/// Рисует границу и имя чертежа.
 		/// </summary>
 		public void DrawBorder(DrawingBorders border)
 		{
-			// Обводим рамку прямоугольником
-			Drawable rec = CreateRectangle(border.First, border.Second);
-			this.objects.Add(rec);
-			TransientManager tm = TransientManager.CurrentTransientManager;
-			tm.AddTransient(rec, TransientDrawingMode.Highlight, 128, new IntegerCollection());
+			try
+			{
+				// Обводим рамку прямоугольником
+				Drawable rec = CreateRectangle(border.First, border.Second);
+				AddTransient(rec, TransientDrawingMode.Highlight, 128);
 
-			// Вписываем в рамку название будущего листа и его формат
-			Drawable txt = CreateLayoutNameMText(border.Center, border.Name, border.PSInfo.Name, border.ScaleFactor);
-			this.objects.Add(txt);
-			tm.AddTransient(txt, TransientDrawingMode.DirectShortTerm, 256, new IntegerCollection());
+				// Вписываем в рамку название будущего листа и его формат
+				Drawable txt = CreateLayoutNameMText(border.Center, border.Name, border.PSInfo.Name, border.ScaleFactor);
+				AddTransient(txt, TransientDrawingMode.DirectShortTerm, 256);
+			}
+			catch
+			{
+				ClearData();
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Регистрирует объект в менеджере временной графики и сохраняет его
+		/// только после подтверждённого добавления.
+		/// </summary>
+		private void AddTransient(Drawable drawable, TransientDrawingMode mode, int subDrawingMode)
+		{
+			try
+			{
+				TransientManager tm = TransientManager.CurrentTransientManager;
+				if (tm == null || !tm.AddTransient(drawable, mode, subDrawingMode, this.viewportNumbers))
+				{
+					drawable.Dispose();
+					return;
+				}
+
+				this.objects.Add(drawable);
+			}
+			catch
+			{
+				// AddTransient мог зарегистрировать объект до возникновения исключения.
+				// Не допускаем его последующую финализацию с неизвестным состоянием менеджера.
+				GC.SuppressFinalize(drawable);
+				throw;
+			}
 		}
 		
 		/// <summary>
@@ -73,16 +112,60 @@ namespace LayoutsFromModel
 		/// </summary>
 		public void ClearData()
 		{
+			if (this.objects.Count == 0)
+				return;
+
+			bool fallbackHandled = false;
 			TransientManager tm = TransientManager.CurrentTransientManager;
-			if (tm != null && this.objects != null || this.objects.Count != 0)
+			foreach (Drawable obj in this.objects)
 			{
-				tm.EraseTransients(TransientDrawingMode.Highlight, 128, new IntegerCollection());
-				tm.EraseTransients(TransientDrawingMode.DirectShortTerm, 256, new IntegerCollection());
-				foreach (Drawable obj in this.objects)
+				bool erased = false;
+				try
 				{
-					obj.Dispose();
+					erased = tm != null && tm.EraseTransient(obj, this.viewportNumbers);
 				}
-				this.objects.Clear();
+				catch
+				{
+					// Ошибка очистки временной графики не должна прерывать отмену команды.
+					fallbackHandled = true;
+				}
+
+				if (erased)
+				{
+					try
+					{
+						obj.Dispose();
+					}
+					catch
+					{
+						fallbackHandled = true;
+						GC.SuppressFinalize(obj);
+					}
+				}
+				else
+				{
+					fallbackHandled = true;
+					// AutoCAD всё ещё может хранить нативный указатель на объект.
+					// Освобождение или финализация в этом состоянии приводит
+					// к Access Violation и критическому вылету из AutoCAD.
+					// Во избежании краша - выполняем через GC.SuppressFinalize(obj)
+					GC.SuppressFinalize(obj);
+				}
+			}
+
+			this.objects.Clear();
+
+			if (fallbackHandled && this.ed != null)
+			{
+				try
+				{
+					this.ed.WriteMessage(
+						"\nПредупреждение: обработан аварийный сценарий очистки временной графики.\n");
+				}
+				catch
+				{
+					// Диагностический вывод не должен влиять на выполнение команды.
+				}
 			}
 		}
 	}

@@ -31,7 +31,7 @@ namespace LayoutsFromModel
         public List<DrawingBorders> GetDrawingBorders()
         {
             List<DrawingBorders> borders = new List<DrawingBorders>();
-            BorderDrawer drawer = new BorderDrawer();
+            BorderDrawer drawer = new BorderDrawer(ed);
 
             using (AcadSystemVariableSwitcher varSW = new AcadSystemVariableSwitcher("OSMODE", 1))
             {

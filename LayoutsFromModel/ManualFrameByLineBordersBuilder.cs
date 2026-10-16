@@ -49,7 +49,7 @@ namespace LayoutsFromModel
 				// Крутимся, пока нужны новые масштабы (а один раз он точно нужен)
 				bool needNewScale = true;
 				
-				BorderDrawer drawer = new BorderDrawer();
+				BorderDrawer drawer = new BorderDrawer(ed);
 				
 				while (needNewScale)
 				{

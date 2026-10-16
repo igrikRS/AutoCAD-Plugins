@@ -36,7 +36,7 @@ namespace LayoutsFromModel
 
             Configuration.AppConfig cfg = Configuration.AppConfig.Instance;
 
-            BorderDrawer drawer = new BorderDrawer();
+            BorderDrawer drawer = new BorderDrawer(ed);
 
             using (Transaction tr = _wdb.TransactionManager.StartTransaction())
             {
@@ -48,7 +48,7 @@ namespace LayoutsFromModel
                     do
                     {
                         isBlock = true;
-                        borderRes = GetBlockBorder(tr, ref isBlock);
+                        borderRes = GetBorderPromptResult(tr, borders.Count, ref isBlock);
                     } while (!isBlock);
 
                     switch (borderRes.QueryStatus)
@@ -104,7 +104,7 @@ namespace LayoutsFromModel
                             break;
 
                         case PromptResultStatus.Cancelled:
-                            ed.WriteMessage("\nОтмена! (кнопкой)");
+                            ed.WriteMessage("\nОтмена! (кнопкой)\n");
                             needNewBorder = false;
 
                             if (borders.Count > 0)
@@ -137,13 +137,14 @@ namespace LayoutsFromModel
         /// <summary>
         /// Запрашивает объект и определяет его границы.
         /// </summary>
-        BorderPromptResult GetBlockBorder(Transaction tr, ref bool isBlock)
+        BorderPromptResult GetBorderPromptResult(Transaction tr, int bordersCount, ref bool isBlock)
         {
             PromptEntityOptions opt = new PromptEntityOptions("\nУкажите рамку формата листа:");
 
             opt.Keywords.Add(CO.Process);
             opt.Keywords.Add(CO.Undo);
             opt.Keywords.Add(CO.Cancel);
+            opt.AllowNone = true;
             PromptEntityResult rs = ed.GetEntity(opt);
 
             if (rs.Status == PromptStatus.OK)
@@ -163,6 +164,37 @@ namespace LayoutsFromModel
             else if (rs.Status == PromptStatus.Keyword)
             {
                 return new BorderPromptResult(rs.StringResult);
+            }
+            else if (rs.Status == PromptStatus.None && bordersCount > 0)
+            {
+                System.Windows.MessageBoxResult confirmation = System.Windows.MessageBox.Show(
+                    "Вы хотите начать процесс создания?",
+                    "Создание листов",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question,
+                    System.Windows.MessageBoxResult.No);
+
+                if (confirmation == System.Windows.MessageBoxResult.Yes)
+                    return new BorderPromptResult(CO.Process);
+
+                isBlock = false;
+            }
+            else if (rs.Status == PromptStatus.Cancel)
+            {
+                if (bordersCount == 0)
+                    return new BorderPromptResult(PromptResultStatus.Cancelled);
+
+                System.Windows.MessageBoxResult confirmation = System.Windows.MessageBox.Show(
+                    "Вы потеряете выделенные рамки! Продолжить?",
+                    "Отмена создания листов",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Warning,
+                    System.Windows.MessageBoxResult.No);
+
+                if (confirmation == System.Windows.MessageBoxResult.Yes)
+                    return new BorderPromptResult(PromptResultStatus.Cancelled);
+
+                isBlock = false;
             }
             else
             {
