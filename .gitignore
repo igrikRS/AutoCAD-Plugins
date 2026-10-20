@@ -30,6 +30,12 @@ obj/
 # [Rr]elease*/
 Ankh.NoLoad
 
+# Releases
+Releases/*.dll
+Releases/*.xml
+Releases/*.dwt
+Releases/Plotters/
+
 #Tooling
 _ReSharper*/
 *.resharper
