@@ -218,16 +218,17 @@ namespace LayoutsFromModel
                 Configuration.AppConfig.Instance.BlockRatioScale = blockRatioScale;
             }
 
-            double scale = bref.ScaleFactors.Y * blockRatioScale;
-            double listWidtht = (bref.GeometricExtents.MaxPoint.X - bref.GeometricExtents.MinPoint.X) / scale;
-            double listhight = (bref.GeometricExtents.MaxPoint.Y - bref.GeometricExtents.MinPoint.Y) / scale;
+            double scale = bref.ScaleFactors.X * blockRatioScale;
+            Extents3d geometricExtents = BlockGeometryHelper.GetVisibleExtents(bref);
+            double listWidtht = (geometricExtents.MaxPoint.X - geometricExtents.MinPoint.X) / scale;
+            double listhight = (geometricExtents.MaxPoint.Y - geometricExtents.MinPoint.Y) / scale;
 
             ed.WriteMessage("\nБЛОК-рамка: {0}x{1} (масштаб: {2})", System.Convert.ToInt32(listWidtht),
                                                                     System.Convert.ToInt32(listhight), scale);
 
 
-            return new BorderPromptResult(bref.GeometricExtents.MinPoint,
-                                            bref.GeometricExtents.MaxPoint,
+            return new BorderPromptResult(geometricExtents.MinPoint,
+                                            geometricExtents.MaxPoint,
                                             scale);
         }
 

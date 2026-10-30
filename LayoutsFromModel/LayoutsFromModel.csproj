@@ -111,6 +111,7 @@
     <Compile Include="Extensions\LayersLibrary.cs" />
     <Compile Include="Extensions\AcadSystemVariableSwitcher.cs" />
     <Compile Include="Extensions\Zoom.cs" />
+    <Compile Include="Helpers\BlockGeometryHelper.cs" />
     <Compile Include="Helpers\CompareHelper.cs" />
     <Compile Include="Helpers\EscapeCancellation.cs" />
     <Compile Include="PromptResultStatus.cs" />
