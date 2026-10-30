@@ -158,17 +158,23 @@ namespace LayoutsFromModel.Configuration
                         continue;
                     }
 
-                    PromptKeywordOptions tagOptions = new PromptKeywordOptions(
-                        "\nВыберите тег для указания номера листа:");
-                    tagOptions.AllowNone = false;
-                    foreach (string tagName in tagNames)
-                        tagOptions.Keywords.Add(tagName);
+                    document.Editor.WriteMessage("\nДоступные теги для указания номера листа:");
+                    for (int i = 0; i < tagNames.Count; i++)
+                        document.Editor.WriteMessage($"\n  {i + 1}. {tagNames[i]}");
 
-                    PromptResult tagResult = document.Editor.GetKeywords(tagOptions);
+                    PromptIntegerOptions tagOptions = new PromptIntegerOptions(
+                        $"\nВведите номер тега [1-{tagNames.Count}]:")
+                    {
+                        AllowNone = false,
+                        LowerLimit = 1,
+                        UpperLimit = tagNames.Count
+                    };
+
+                    PromptIntegerResult tagResult = document.Editor.GetInteger(tagOptions);
                     if (tagResult.Status != PromptStatus.OK)
                         return;
 
-                    selectedTagName = tagResult.StringResult;
+                    selectedTagName = tagNames[tagResult.Value - 1];
                     break;
                 }
             }

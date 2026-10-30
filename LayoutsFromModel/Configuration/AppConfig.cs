@@ -201,8 +201,8 @@ namespace LayoutsFromModel.Configuration
                                                               BlockRatioScale,
                                                               LockViewPorts,
                                                               ManualFrameWithPaperFormat);
-            win.ShowDialog();
-            if (true == win.DialogResult)
+            bool? dialogResult = Autodesk.AutoCAD.ApplicationServices.Application.ShowModalWindow(win);
+            if (dialogResult == true)
             {
                 this.Prefix = win.Prefix;
                 this.Suffix = win.Suffix;

@@ -66,7 +66,7 @@ namespace LayoutsFromModel
                         continue;
 
                     PaperFormatSelectionDialog formatDialog = new PaperFormatSelectionDialog();
-                    if (formatDialog.ShowDialog() != true)
+                    if (Autodesk.AutoCAD.ApplicationServices.Application.ShowModalWindow(formatDialog) != true)
                         continue;
 
                     double width = Math.Abs(borderResult.FirstPoint.X - borderResult.SecondPoint.X);

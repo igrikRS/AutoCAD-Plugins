@@ -31,7 +31,7 @@ namespace LayoutsFromModel
             while (true)
             {
                 LayoutsCreationDialog dialog = new LayoutsCreationDialog();
-                if (dialog.ShowDialog() != true)
+                if (acad.ShowModalWindow(dialog) != true)
                     return;
 
                 IBordersCollectionBuilder bordersBuilder = null;
