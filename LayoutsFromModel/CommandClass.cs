@@ -156,6 +156,11 @@ namespace LayoutsFromModel
                 progressDialog.CloseProgress();
             }
 
+            if (viewportIds.Count > 0 && !creationCancelled)
+            {
+                layoutCreator.DeleteLayoutIfExists("Y");
+            }
+
             stopwatch.Stop();
             ed.WriteMessage("\nВремя выполнения: {0} с\n", stopwatch.ElapsedMilliseconds / 1000);
 

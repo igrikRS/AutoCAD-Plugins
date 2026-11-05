@@ -266,6 +266,32 @@ namespace LayoutsFromModel
         }
 
         /// <summary>
+        /// Удаляет лист с указанным именем, если он существует.
+        /// </summary>
+        /// <param name="layoutName">Имя удаляемого листа.</param>
+        public bool DeleteLayoutIfExists(string layoutName)
+        {
+            bool layoutExists = false;
+
+            if (string.IsNullOrWhiteSpace(layoutName)) return false;
+
+            using (Transaction transaction = wdb.TransactionManager.StartTransaction())
+            {
+                DBDictionary layouts = (DBDictionary)transaction.GetObject(
+                    wdb.LayoutDictionaryId,
+                    OpenMode.ForRead);
+                layoutExists = layouts.Contains(layoutName);
+            }
+
+            if (layoutExists)
+            {
+                LayoutManager.Current.DeleteLayout(layoutName);
+            }
+
+            return layoutExists;
+        }
+
+        /// <summary>
         /// Удаляет все листы, кроме первого по порядку вкладок.
         /// Оставшийся лист переименовывает в "Y".
         /// </summary>
