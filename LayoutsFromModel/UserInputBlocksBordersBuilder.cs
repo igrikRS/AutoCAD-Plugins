@@ -92,11 +92,19 @@ namespace LayoutsFromModel
 
                         case PromptResultStatus.OK:
                             string bordername = string.Format("{0}{1}{2}", cfg.Prefix, InitialBorderIndex++, cfg.Suffix);
-                            DrawingBorders border =
-                                DrawingBorders.CreateDrawingBorders(borderRes.FirstPoint,
-                                                                    borderRes.SecondPoint,
-                                                                    bordername,
-                                                                    borderRes.GetScale);
+                            DrawingBorders border = borderRes.IsRotated
+                                ? DrawingBorders.CreateRotatedDrawingBorders(
+                                    borderRes.FirstPoint,
+                                    borderRes.Width,
+                                    borderRes.Height,
+                                    borderRes.RotationZ,
+                                    bordername,
+                                    borderRes.GetScale)
+                                : DrawingBorders.CreateDrawingBorders(
+                                    borderRes.FirstPoint,
+                                    borderRes.SecondPoint,
+                                    bordername,
+                                    borderRes.GetScale);
                             ed.WriteMessage("\nДобавляем лист {0}. Формат листа: {1}", bordername, border.PSInfo.Name);
                             borders.Add(border);
                             border.Accept(drawer);
@@ -219,17 +227,21 @@ namespace LayoutsFromModel
             }
 
             double scale = bref.ScaleFactors.X * blockRatioScale;
-            Extents3d geometricExtents = BlockGeometryHelper.GetVisibleExtents(bref);
-            double listWidtht = (geometricExtents.MaxPoint.X - geometricExtents.MinPoint.X) / scale;
-            double listhight = (geometricExtents.MaxPoint.Y - geometricExtents.MinPoint.Y) / scale;
+            BlockGeometryHelper.OrientedBlockBounds bounds =
+                BlockGeometryHelper.GetVisibleOrientedBounds(bref);
+            double listWidtht = bounds.Width / scale;
+            double listhight = bounds.Height / scale;
 
             ed.WriteMessage("\nБЛОК-рамка: {0}x{1} (масштаб: {2})", System.Convert.ToInt32(listWidtht),
                                                                     System.Convert.ToInt32(listhight), scale);
 
 
-            return new BorderPromptResult(geometricExtents.MinPoint,
-                                            geometricExtents.MaxPoint,
-                                            scale);
+            return new BorderPromptResult(
+                bounds.Center,
+                bounds.Width,
+                bounds.Height,
+                bounds.RotationZ,
+                scale);
         }
 
         /// <summary>

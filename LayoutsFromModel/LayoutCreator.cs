@@ -165,9 +165,12 @@ namespace LayoutsFromModel
             viewport.CenterPoint = new Point3d(viewport.Width / 2 + layout.PlotOrigin.X,
                                               viewport.Height / 2 + layout.PlotOrigin.Y,
                                               0);
-            viewport.ViewTarget = new Point3d(0, 0, 0);
+            viewport.ViewTarget = borders.Center;
             viewport.ViewHeight = borders.Height;
-            viewport.ViewCenter = new Point2d(borders.Center.X, borders.Center.Y);
+            viewport.ViewCenter = Point2d.Origin;
+            // Viewport twist rotates WCS into DCS. To align a frame rotated
+            // counterclockwise in WCS with the viewport axes, use the opposite angle.
+            viewport.TwistAngle = -borders.RotationZ;
             viewport.Locked = Configuration.AppConfig.Instance.LockViewPorts;
             viewport.On = false;
 

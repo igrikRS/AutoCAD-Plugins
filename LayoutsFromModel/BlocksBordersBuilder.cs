@@ -119,10 +119,15 @@ namespace LayoutsFromModel
             {
                 BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
                 double scale = bref.ScaleFactors.X;
-                border = DrawingBorders.CreateDrawingBorders(bref.GeometricExtents.MinPoint,
-                                                             bref.GeometricExtents.MaxPoint,
-                                                             name,
-                                                             scale);
+                BlockGeometryHelper.OrientedBlockBounds bounds =
+                    BlockGeometryHelper.GetVisibleOrientedBounds(bref);
+                border = DrawingBorders.CreateRotatedDrawingBorders(
+                    bounds.Center,
+                    bounds.Width,
+                    bounds.Height,
+                    bounds.RotationZ,
+                    name,
+                    scale);
                 tr.Commit();
             }
             return border;

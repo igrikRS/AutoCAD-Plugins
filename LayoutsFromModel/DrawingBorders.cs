@@ -9,22 +9,24 @@ namespace LayoutsFromModel
     /// </summary>
     public sealed class DrawingBorders
     {
-        Point3d first;
+        private readonly Point3d center;
+        private readonly double width;
+        private readonly double height;
+
         /// <summary>
         /// Первая точка рамки
         /// </summary>
         public Point3d First
         {
-            get { return first; }
+            get { return GetCorners()[0]; }
         }
 
-        Point3d second;
         /// <summary>
         /// Вторая точка рамки, противоположная первой
         /// </summary>
         public Point3d Second
         {
-            get { return second; }
+            get { return GetCorners()[2]; }
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace LayoutsFromModel
         /// </summary>
         public double Height
         {
-            get { return Math.Abs(first.Y - second.Y); }
+            get { return height; }
         }
 
         /// <summary>
@@ -40,7 +42,7 @@ namespace LayoutsFromModel
         /// </summary>
         public double Width
         {
-            get { return Math.Abs(first.X - second.X); }
+            get { return width; }
         }
 
         /// <summary>
@@ -48,8 +50,13 @@ namespace LayoutsFromModel
         /// </summary>
         public Point3d Center
         {
-            get { return (new LineSegment3d(first, second)).MidPoint; }
+            get { return center; }
         }
+
+        /// <summary>
+        /// Поворот рамки относительно мировой оси X вокруг оси Z, в радианах.
+        /// </summary>
+        public double RotationZ { get; private set; }
 
         string name;
         /// <summary>
@@ -79,10 +86,18 @@ namespace LayoutsFromModel
         /// <summary>
         /// Создаёт описание границ чертежа.
         /// </summary>
-        private DrawingBorders(Point3d first, Point3d second, string name, double scale)
+        private DrawingBorders(
+            Point3d center,
+            double width,
+            double height,
+            double rotationZ,
+            string name,
+            double scale)
         {
-            this.first = first;
-            this.second = second;
+            this.center = center;
+            this.width = width;
+            this.height = height;
+            this.RotationZ = rotationZ;
             this.name = name;
             this.ScaleFactor = scale;
         }
@@ -92,10 +107,64 @@ namespace LayoutsFromModel
         /// </summary>
         public static DrawingBorders CreateDrawingBorders(Point3d first, Point3d second, string name, double scale)
         {
-            DrawingBorders borders = new DrawingBorders(first, second, name, scale);
+            Point3d center = new LineSegment3d(first, second).MidPoint;
+            DrawingBorders borders = new DrawingBorders(
+                center,
+                Math.Abs(first.X - second.X),
+                Math.Abs(first.Y - second.Y),
+                0.0,
+                name,
+                scale);
             PlotSettingsManager psm = PlotSettingsManager.Current;
             borders.PSInfo = psm.GetPlotSettings(borders, Configuration.AppConfig.Instance.Precision);
             return borders;
+        }
+
+        /// <summary>
+        /// Создаёт границы прямоугольного чертежа, повёрнутого вокруг оси Z.
+        /// </summary>
+        public static DrawingBorders CreateRotatedDrawingBorders(
+            Point3d center,
+            double width,
+            double height,
+            double rotationZ,
+            string name,
+            double scale)
+        {
+            if (width < 0.0)
+                throw new ArgumentOutOfRangeException("width");
+            if (height < 0.0)
+                throw new ArgumentOutOfRangeException("height");
+
+            DrawingBorders borders = new DrawingBorders(
+                center,
+                width,
+                height,
+                rotationZ,
+                name,
+                scale);
+            PlotSettingsManager psm = PlotSettingsManager.Current;
+            borders.PSInfo = psm.GetPlotSettings(borders, Configuration.AppConfig.Instance.Precision);
+            return borders;
+        }
+
+        /// <summary>
+        /// Возвращает углы рамки по порядку обхода.
+        /// </summary>
+        public Point3d[] GetCorners()
+        {
+            double cos = Math.Cos(RotationZ);
+            double sin = Math.Sin(RotationZ);
+            Vector3d halfWidth = new Vector3d(cos * width / 2.0, sin * width / 2.0, 0.0);
+            Vector3d halfHeight = new Vector3d(-sin * height / 2.0, cos * height / 2.0, 0.0);
+
+            return new[]
+            {
+                center - halfWidth - halfHeight,
+                center + halfWidth - halfHeight,
+                center + halfWidth + halfHeight,
+                center - halfWidth + halfHeight
+            };
         }
 
         /// <summary>
@@ -103,7 +172,14 @@ namespace LayoutsFromModel
         /// </summary>
         public override string ToString()
         {
-            return string.Format("[LayoutBorders First={0}, Second={1}, Name={2}, Scale={3}]", first, second, name, ScaleFactor);
+            return string.Format(
+                "[LayoutBorders Center={0}, Width={1}, Height={2}, RotationZ={3}, Name={4}, Scale={5}]",
+                Center,
+                Width,
+                Height,
+                RotationZ,
+                name,
+                ScaleFactor);
         }
 
         /// <summary>

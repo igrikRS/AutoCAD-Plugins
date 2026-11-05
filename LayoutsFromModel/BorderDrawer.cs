@@ -32,11 +32,16 @@ namespace LayoutsFromModel
 			try
 			{
 				// Обводим рамку прямоугольником
-				Drawable rec = CreateRectangle(border.First, border.Second);
+				Drawable rec = CreateRectangle(border.GetCorners());
 				AddTransient(rec, TransientDrawingMode.Highlight, 128);
 
 				// Вписываем в рамку название будущего листа и его формат
-				Drawable txt = CreateLayoutNameMText(border.Center, border.Name, border.PSInfo.Name, border.ScaleFactor);
+				Drawable txt = CreateLayoutNameMText(
+					border.Center,
+					border.Name,
+					border.PSInfo.Name,
+					border.ScaleFactor,
+					border.RotationZ);
 				AddTransient(txt, TransientDrawingMode.DirectShortTerm, 256);
 			}
 			catch
@@ -75,18 +80,12 @@ namespace LayoutsFromModel
 		/// <summary>
 		/// Создаёт прямоугольник по двум точкам.
 		/// </summary>
-		private ADS.DBObject CreateRectangle(Point3d first, Point3d second)
+		private ADS.DBObject CreateRectangle(Point3d[] corners)
 		{
 			ADS.Polyline pl = new ADS.Polyline(4);
 			pl.Color = this.graphicsColor;
-			double firstX = first.X;
-			double secondX = second.X;
-			double firstY = first.Y;
-			double secondY = second.Y;
-			pl.AddVertexAt(0, new Point2d(firstX, firstY), 0, 0, 0);
-			pl.AddVertexAt(1, new Point2d(firstX, secondY), 0, 0, 0);
-			pl.AddVertexAt(2, new Point2d(secondX, secondY), 0, 0, 0);
-			pl.AddVertexAt(3, new Point2d(secondX, firstY), 0, 0, 0);
+			for (int index = 0; index < corners.Length; index++)
+				pl.AddVertexAt(index, new Point2d(corners[index].X, corners[index].Y), 0, 0, 0);
 			pl.Closed = true;
 			return pl;
 		}
@@ -94,7 +93,12 @@ namespace LayoutsFromModel
 		/// <summary>
 		/// Создаёт текст с именем листа.
 		/// </summary>
-		private ADS.DBObject CreateLayoutNameMText(Point3d center, string name, string format, double scaleFactor)
+		private ADS.DBObject CreateLayoutNameMText(
+			Point3d center,
+			string name,
+			string format,
+			double scaleFactor,
+			double rotationZ)
 		{
 			ADS.MText mt = new ADS.MText();
 			mt.SetDatabaseDefaults(ADS.HostApplicationServices.WorkingDatabase);
@@ -103,6 +107,7 @@ namespace LayoutsFromModel
 			mt.Contents = name + "\\P" + format;
 			mt.TextHeight = 12 * scaleFactor;
 			mt.Location = center;
+			mt.Rotation = rotationZ;
 			mt.Attachment = ADS.AttachmentPoint.MiddleCenter;
 			return mt;
 		}

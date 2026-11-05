@@ -185,12 +185,16 @@ namespace LayoutsFromModel
 
                 BlockReference bref = (BlockReference)tr.GetObject(brefId, OpenMode.ForRead);
                 double scale = bref.ScaleFactors.X * blockRatioScale;
-                Extents3d geometricExtents = BlockGeometryHelper.GetVisibleExtents(bref);
+                BlockGeometryHelper.OrientedBlockBounds bounds =
+                    BlockGeometryHelper.GetVisibleOrientedBounds(bref);
 
-                border = DrawingBorders.CreateDrawingBorders(geometricExtents.MinPoint,
-                                                             geometricExtents.MaxPoint,
-                                                             name,
-                                                             scale);
+                border = DrawingBorders.CreateRotatedDrawingBorders(
+                    bounds.Center,
+                    bounds.Width,
+                    bounds.Height,
+                    bounds.RotationZ,
+                    name,
+                    scale);
 
                 tr.Commit();
             }

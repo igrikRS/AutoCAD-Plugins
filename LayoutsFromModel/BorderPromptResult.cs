@@ -33,6 +33,30 @@ namespace LayoutsFromModel
             get { return scale; }
         }
 
+        double width;
+        public double Width
+        {
+            get { return width; }
+        }
+
+        double height;
+        public double Height
+        {
+            get { return height; }
+        }
+
+        double rotationZ;
+        public double RotationZ
+        {
+            get { return rotationZ; }
+        }
+
+        bool isRotated;
+        public bool IsRotated
+        {
+            get { return isRotated; }
+        }
+
         PromptResultStatus queryStatus;
         public PromptResultStatus QueryStatus
         {
@@ -50,6 +74,31 @@ namespace LayoutsFromModel
             this.secondPoint = secondPoint;
             this.stringResult = "";
             this.scale = scale;
+            this.width = Math.Abs(firstPoint.X - secondPoint.X);
+            this.height = Math.Abs(firstPoint.Y - secondPoint.Y);
+            this.rotationZ = 0.0;
+            this.isRotated = false;
+        }
+
+        /// <summary>
+        /// Создаёт результат выбора повёрнутой рамки.
+        /// </summary>
+        public BorderPromptResult(
+            Point3d center,
+            double width,
+            double height,
+            double rotationZ,
+            double scale)
+        {
+            this.queryStatus = PromptResultStatus.OK;
+            this.firstPoint = center;
+            this.secondPoint = center;
+            this.stringResult = "";
+            this.scale = scale;
+            this.width = width;
+            this.height = height;
+            this.rotationZ = rotationZ;
+            this.isRotated = true;
         }
 
         /// <summary>
@@ -62,6 +111,10 @@ namespace LayoutsFromModel
             this.firstPoint = Point3d.Origin;
             this.secondPoint = Point3d.Origin;
             this.scale = 100;
+            this.width = 0.0;
+            this.height = 0.0;
+            this.rotationZ = 0.0;
+            this.isRotated = false;
         }
 
         /// <summary>
@@ -74,6 +127,10 @@ namespace LayoutsFromModel
             this.secondPoint = Point3d.Origin;
             this.stringResult = "";
             this.scale = scale;
+            this.width = 0.0;
+            this.height = 0.0;
+            this.rotationZ = 0.0;
+            this.isRotated = false;
         }
     }
 }
